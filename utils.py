@@ -11,10 +11,10 @@ def whatismyip(site='http://ipecho.net/plain'):
   if not MY_IP:
     print("Fetching new copy of public IP from " + site + "...")
     MY_IP = urllib.urlopen(site).read()
+    print("Got " + MY_IP)
 
   # FIXME: better regex is possible
   if is_valid_ip(MY_IP):
-    print("Got " + MY_IP)
     return MY_IP
   else:
     print("Error: failed to fetch a valid public-facing IP address")

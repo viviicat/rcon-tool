@@ -75,14 +75,17 @@ class ServerManager(object):
 
     pl.set_visible(not pl.get_visible())
 
-  def log_rcon(self, server, command):
+  def log_rcon(self, server, command, threaded=True):
     if not self.cur_server.rcon_connected():
       self.cur_server.set_rcon(self.bd.get_object("rcon_password").get_text())
 
-    d = threads.deferToThread(self.cur_server.rcon_cmd, command)
-    d.addCallback(self.on_log_rcon_finished, command, server)
+    if threaded:
+      d = threads.deferToThread(self.cur_server.rcon_cmd, command)
+      d.addCallback(self.on_log_rcon_finished, command, server)
 
-    return d
+      return d
+    else:
+      return self.on_log_rcon_finished(self.cur_server.rcon_cmd(command), command, server)
 
   def on_log_rcon_finished(self, ret_tuple, command, server):
     success, response = ret_tuple
@@ -295,16 +298,21 @@ class ServerManager(object):
     if not success:
       return
 
+    s, r = self.log_rcon(server, 'log', False)
+    if 'not currently logging' in r:
+      self.log_rcon(server, 'log on', False)
+
     ip = utils.whatismyip()
 
     for port in range(27020,27100):
+      # FIXME: this needs to be done linearly instead of sending all the requests at once, since we get errors
       try:
         self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
         for line in response.split('\n'):
           if ip in line and str(port) not in line:
-            self.log_rcon(server, 'logaddress_del ' + line)
+            self.log_rcon(server, 'logaddress_del ' + line, False)
 
-        self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port))
+        self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
         break
 
       except twisted.internet.error.CannotListenError:
