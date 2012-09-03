@@ -1,0 +1,76 @@
+Goals
+	Python/Glade-based UI which will allow for simple, easy server management using the RCON protocol.
+	All Valve games supported (servers running any supported platforms)
+	L4D2 supported as priority (since it's going to be the first linux game)
+	Elegant, intuitive UI
+Future Goals/Expansions
+	Other rcon protocol support for working with alternate server setups
+Base features
+	#Saved list of servers w/ rcon passwords
+	#textbox to issue rcon commands, textview to view output
+	#Ability to connect to server logs w/ logaddress_add
+		#Need to figure out how to programmatically obtain public-facing IP in linux
+Advanced features
+	Sourcemod command support
+	Easy-use buttons for kicking/banning, all that jazz
+	Logging tools
+	Bots & a bot API!
+	Synchronized commands across a set of servers (so like server groups)
+	Link to FTP, so you can right click to open an ftp connection?
+	Windows support (as an OSS alternative to HLSW)
+Separate GUI elements
+	#rcongui is a megaclass
+	#rconlogger.py
+		log basic log and pretty log
+		derived classes for each game mod
+	#server manager
+		integrate better with the gui, own server-specific data/buffers
+		deal with server-specific events
+		work with rconservers (multiple rconservers, one server manager)
+	#change connect_signals call to use a mapping
+		Map different areas of the window to different class components
+		Pass the dictionary in the constructor for the components
+Share GUI with servers better
+	The entire point is to guify sourcelib so there's no need to decouple the gui
+
+
+#Query subsystem
+	On load:
+		Begin net thread
+		loop:
+			lock:
+				check list of new servers
+				add to existing servers list
+			for all existing servers, establish query connection
+			send query info to rcontool via gobject.idle_add()
+	On server add:
+		gui thread locks list of new servers
+			adds new server
+		main thread will get new server next time it comes to top of loop
+	Caveats:
+		servers are queried in order
+			Solution: randomize order of query
+			but that's silly
+			Query selected server first perhaps
+		cannot query one server (e.g. the currently-selected server) more
+		
+	But:
+		It shouldn't matter too much as queries are fast
+		we should get through all servers pretty quickly
+		Set any timeouts to be relatively quick
+
+#How an rcon command runs:
+	Don't make it asyncronous just yet as that's a huge pain
+		maybe use twisted later?
+	server.rcon_cmd called
+	Calls sourcelib and gets a response
+	calls self.manager.log_rcon(self, query, response)
+
+Problems
+	No git (derp)
+	Need a better query-failure triage system
+		servers that are fine but don't work at the moment should be in the list but be 'unselectable'
+		Items should empty the cur_server var when clicked
+		display disconnect icon in field?
+		continue to ping them on a slower timescale (5s)
+		when they return, allow them to be clicked

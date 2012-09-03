@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=RCON Tool
+Version=0.1
+Comment=Tool for Remote CONtrol administration of SRCDS Servers
+GenericName=RCON Tool Server Administration
+Terminal=false
+Icon=/home/gavin/rcontool/rcontool.png
+Type=Application
+Exec=python /home/gavin/rcontool/main.py
+Categories=Accessories;
