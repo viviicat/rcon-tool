@@ -64,11 +64,14 @@ class Gameserver(object):
       self.info['ip'] = self.ip
       return True, ""
     except (SourceLib.SourceQuery.SourceQueryError, socket.gaierror) as e:
-      self.info['ping'] = 1000
-      return False, e
+      error = e
     except socket.timeout as e:
-      self.info['ping'] = 1000
-      return False, "Server timed out"
+      error = "Request timed out"
+    except socket.error as e:
+      error = e
+
+    self.info['ping'] = 1000
+    return False, error
 
   def cleanup(self):
     if self.rcon_connected():
