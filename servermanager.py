@@ -294,8 +294,10 @@ class ServerManager(object):
 
 
   def set_logging_post_list(self, ret_tuple, server):
+    # FIXME: Not sure if this is run in a thread or not... So it potentially hangs the system, but I don't know
     success, response = ret_tuple
     if not success:
+      self.bd.get_object("act_toggle_logging").set_active(False)
       return
 
     s, r = self.log_rcon(server, 'log', False)

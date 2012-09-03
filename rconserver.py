@@ -47,6 +47,9 @@ class Gameserver(object):
     except SourceLib.SourceRcon.SourceRconError as e:
       self.rcon = None
       return False, str(e)
+    except socket.gaierror as e:
+      self.rcon = None
+      return False, str(e)
 
   def query(self):
     try:

@@ -5,11 +5,6 @@ Goals
 	Elegant, intuitive UI
 Future Goals/Expansions
 	Other rcon protocol support for working with alternate server setups
-Base features
-	#Saved list of servers w/ rcon passwords
-	#textbox to issue rcon commands, textview to view output
-	#Ability to connect to server logs w/ logaddress_add
-		#Need to figure out how to programmatically obtain public-facing IP in linux
 Advanced features
 	Sourcemod command support
 	Easy-use buttons for kicking/banning, all that jazz
@@ -18,22 +13,6 @@ Advanced features
 	Synchronized commands across a set of servers (so like server groups)
 	Link to FTP, so you can right click to open an ftp connection?
 	Windows support (as an OSS alternative to HLSW)
-Separate GUI elements
-	#rcongui is a megaclass
-	#rconlogger.py
-		log basic log and pretty log
-		derived classes for each game mod
-	#server manager
-		integrate better with the gui, own server-specific data/buffers
-		deal with server-specific events
-		work with rconservers (multiple rconservers, one server manager)
-	#change connect_signals call to use a mapping
-		Map different areas of the window to different class components
-		Pass the dictionary in the constructor for the components
-Share GUI with servers better
-	The entire point is to guify sourcelib so there's no need to decouple the gui
-
-
 #Query subsystem
 	On load:
 		Begin net thread
@@ -67,13 +46,10 @@ Share GUI with servers better
 	calls self.manager.log_rcon(self, query, response)
 
 Problems
-	#No git (derp)
 	Need a better query-failure triage system
 		servers that are fine but don't work at the moment should be in the list but be 'unselectable'
 		Items should empty the cur_server var when clicked
 		display disconnect icon in field?
 		continue to ping them on a slower timescale (5s)
 		when they return, allow them to be clicked
-	Need to run "log on" if log is not enabled
-		run command "log", check if logging
-		otherwise run 'log on'
+	
