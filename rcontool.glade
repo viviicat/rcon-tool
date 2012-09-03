@@ -274,6 +274,18 @@ Uses SourceLib Python RCON library.</property>
       </object>
     </child>
   </object>
+  <object class="GtkMenu" id="add_server_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="menuitem3">
+        <property name="related_action">act_add_server</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -325,6 +337,7 @@ Uses SourceLib Python RCON library.</property>
                         <property name="related_action">act_quit</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -348,6 +361,7 @@ Uses SourceLib Python RCON library.</property>
                         <property name="related_action">act_add_server</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -356,6 +370,7 @@ Uses SourceLib Python RCON library.</property>
                         <property name="related_action">act_remove_server</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -1317,6 +1332,9 @@ Uses SourceLib Python RCON library.</property>
                                               <object class="GtkTreeView" id="treeview2">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
+                                                <child internal-child="selection">
+                                                  <object class="GtkTreeSelection" id="treeview-selection2"/>
+                                                </child>
                                               </object>
                                             </child>
                                           </object>
@@ -1501,6 +1519,9 @@ Uses SourceLib Python RCON library.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">players_liststore</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection3"/>
+                        </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="treeviewcolumn5">
                             <property name="title" translatable="yes">Name</property>
@@ -1610,6 +1631,21 @@ Uses SourceLib Python RCON library.</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
+      <object class="GtkImageMenuItem" id="imagemenuitem3">
+        <property name="related_action">act_add_server</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="menuitem6">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="remove_server_menuitem">
         <property name="related_action">act_remove_server</property>
         <property name="visible">True</property>
@@ -1619,7 +1655,6 @@ Uses SourceLib Python RCON library.</property>
     <child>
       <object class="GtkMenuItem" id="change_hostname_menuitem">
         <property name="use_action_appearance">False</property>
-        <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Change Hostname...</property>
         <property name="use_underline">True</property>

@@ -72,10 +72,12 @@ class RconGui:
       y = int(event.y)
       pthinfo = treeview.get_path_at_pos(x, y)
       if pthinfo is not None:
-          path, col, cellx, celly = pthinfo
-          treeview.grab_focus()
-          treeview.set_cursor( path, col, 0)
-          self.bd.get_object("server_menu").popup(None, None, None, None, event.button, event.time)
+        path, col, cellx, celly = pthinfo
+        treeview.grab_focus()
+        treeview.set_cursor( path, col, 0)
+        self.bd.get_object("server_menu").popup(None, None, None, None, event.button, event.time)
+      else:
+        self.bd.get_object("add_server_menu").popup(None, None, None, None, event.button, event.time)
       return True
 
   def on_save_rcon_toggle_toggled(self, widget):
