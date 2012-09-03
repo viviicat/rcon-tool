@@ -67,10 +67,13 @@ Share GUI with servers better
 	calls self.manager.log_rcon(self, query, response)
 
 Problems
-	No git (derp)
+	#No git (derp)
 	Need a better query-failure triage system
 		servers that are fine but don't work at the moment should be in the list but be 'unselectable'
 		Items should empty the cur_server var when clicked
 		display disconnect icon in field?
 		continue to ping them on a slower timescale (5s)
 		when they return, allow them to be clicked
+	Need to run "log on" if log is not enabled
+		run command "log", check if logging
+		otherwise run 'log on'
