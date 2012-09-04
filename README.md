@@ -16,6 +16,8 @@ First of all, rcon-tool allows you to track multiple servers' status (number of 
 
 rcon-tool also has support for sending rcon commands and receiving a response from the server. In order to enable this feature, you must enter your server's rcon password in the indicated field. You can then type a command in the "console" tab.
 
+*Note: rcon passwords are stored in python pickles, and the option to show the password is always available, so don't expect to be able to hide your rcon password with this tool. Rcon passwords don't really need to be secure IMO (just change the password in your ftp if you are 'compromized'). Rcon commands don't permanently damage anything, in theory*.
+
 Finally, rcon-tool has support for receiving the udp log stream from SRCDS servers. This will allow you to see what's going on in your server (what players are saying, who's connecting, who's killing who, etc).
 
 Known Bugs/Problems/Feature improvements
