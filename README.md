@@ -31,11 +31,11 @@ For now, I'll provide instructions on how to run this on the latest distribution
     - python-twisted
 - clone the latest version on git
 - make sure main.py is executable
-      chmod u+x main.py
+    -    chmod u+x main.py
 - double-clicking on the .desktop file should work
 - alternatively, open a terminal. This will help catch bugs and exceptions due to my sloppy coding.
-      cd path/to/rcontool/
-      ./main.py
+    -    cd path/to/rcontool/
+    -    ./main.py
 
 New Bugs
 ----
