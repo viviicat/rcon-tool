@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
-# servermanager - main class for gui elements relating to servers
+# servermanager - Manages GUI functions related to servers
 # Copyright (c) 2012 Gavin Langdon <puttabutta@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #------------------------------------------------------------------------------
-
 
 
 from gi.repository import Gtk, GObject
@@ -228,11 +227,9 @@ class ServerManager(object):
 
   def on_init_post_query_server(self, ret_tuple, server):
     success, errval = ret_tuple
-    if success:
-      self.add_server_item(server)
-      GObject.timeout_add(1000, self.on_query_timer, server)
-    else:
-      self.delete_server(server)
+
+    self.add_server_item(server, success)
+    GObject.timeout_add(1000, self.on_query_timer, server)
 
   def get_server_sid(self, server):
     return self.get_sid(server.ip, server.port)
@@ -346,25 +343,22 @@ class ServerManager(object):
 
   def on_query_result(self, ret_tuple, server):
     '''Called when the query thread gets info about a server'''
+    success, errmsg = ret_tuple
 
     # update ping graph whether or not this query worked
     server.add_ping_history()
     self.pinggraph.queue_draw()
 
-    success, errmsg = ret_tuple
-    if not success:
-      return ret_tuple
-
-    if self.cur_server and server is self.cur_server:
-      self.populate_query_data(server.info)
-
     store = self.bd.get_object("servers_liststore")
+
 
     for row in store:
       if store.get_value(row.iter, 0) == self.get_server_sid(server):
-        store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'])
+        store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'], 5, Gtk.STOCK_CONNECT)
         break
 
+    if success and self.cur_server and server is self.cur_server:
+      self.populate_query_data(server.info)
 
     return ret_tuple
 
@@ -450,9 +444,9 @@ class ServerManager(object):
     self.bd.get_object("rcon_notebook").set_sensitive(False)
 
 
-  def add_server_item(self, server):
+  def add_server_item(self, server, connected=True):
     store = self.bd.get_object("servers_liststore")
-    iter = store.append([self.get_server_sid(server), server.info['hostname'],str(server.info['numplayers']) + "/" + str(server.info['maxplayers']), server.info['ping'], server.info['map']])
+    iter = store.append([self.get_server_sid(server), server.info['hostname'],str(server.info['numplayers']) + "/" + str(server.info['maxplayers']), server.info['ping'], server.info['map'], Gtk.STOCK_CONNECT if connected else Gtk.STOCK_DISCONNECT])
     self.bd.get_object("server_list").set_cursor(store.get_path(iter))
 
   def close_server_dialog(self, widget):

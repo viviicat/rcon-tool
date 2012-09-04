@@ -282,6 +282,7 @@ Uses SourceLib Python RCON library.</property>
         <property name="related_action">act_add_server</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
         <property name="use_stock">True</property>
       </object>
     </child>
@@ -303,6 +304,57 @@ Uses SourceLib Python RCON library.</property>
   </object>
   <object class="GtkListStore" id="liststore3"/>
   <object class="GtkListStore" id="liststore4"/>
+  <object class="GtkAdjustment" id="query_rate_adjustment">
+    <property name="upper">60</property>
+    <property name="value">1</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkListStore" id="players_liststore">
+    <columns>
+      <!-- column-name player_name -->
+      <column type="gchararray"/>
+      <!-- column-name steamid -->
+      <column type="gchararray"/>
+      <!-- column-name team -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">CSn| Benny Hill</col>
+        <col id="1" translatable="yes">STEAM_0:1:2345</col>
+        <col id="2" translatable="yes">Blue</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="recent_commands">
+    <columns>
+      <!-- column-name command -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
+  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
+    <property name="model">recent_commands</property>
+    <property name="text_column">0</property>
+    <property name="inline_selection">True</property>
+  </object>
+  <object class="GtkListStore" id="servers_liststore">
+    <columns>
+      <!-- column-name ip -->
+      <column type="gchararray"/>
+      <!-- column-name hostname -->
+      <column type="gchararray"/>
+      <!-- column-name players -->
+      <column type="gchararray"/>
+      <!-- column-name ping -->
+      <column type="guint"/>
+      <!-- column-name map -->
+      <column type="gchararray"/>
+      <!-- column-name connection_status_stock -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">400</property>
     <property name="height_request">450</property>
@@ -477,6 +529,12 @@ Uses SourceLib Python RCON library.</property>
                         <property name="reorderable">True</property>
                         <property name="sort_indicator">True</property>
                         <property name="sort_column_id">3</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf" id="cellrendererpixbuf1"/>
+                          <attributes>
+                            <attribute name="stock-id">5</attribute>
+                          </attributes>
+                        </child>
                         <child>
                           <object class="GtkCellRendererText" id="cellrenderertext4"/>
                           <attributes>
@@ -1592,41 +1650,6 @@ Uses SourceLib Python RCON library.</property>
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="players_liststore">
-    <columns>
-      <!-- column-name player_name -->
-      <column type="gchararray"/>
-      <!-- column-name steamid -->
-      <column type="gchararray"/>
-      <!-- column-name team -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">CSn| Benny Hill</col>
-        <col id="1" translatable="yes">STEAM_0:1:2345</col>
-        <col id="2" translatable="yes">Blue</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
-  <object class="GtkAdjustment" id="query_rate_adjustment">
-    <property name="upper">60</property>
-    <property name="value">1</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">1</property>
-  </object>
-  <object class="GtkListStore" id="recent_commands">
-    <columns>
-      <!-- column-name command -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
-    <property name="model">recent_commands</property>
-    <property name="text_column">0</property>
-    <property name="inline_selection">True</property>
-  </object>
   <object class="GtkMenu" id="server_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1635,6 +1658,7 @@ Uses SourceLib Python RCON library.</property>
         <property name="related_action">act_add_server</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="use_underline">True</property>
         <property name="use_stock">True</property>
       </object>
     </child>
@@ -1667,20 +1691,6 @@ Uses SourceLib Python RCON library.</property>
         <property name="can_focus">False</property>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="servers_liststore">
-    <columns>
-      <!-- column-name IP -->
-      <column type="gchararray"/>
-      <!-- column-name Hostname -->
-      <column type="gchararray"/>
-      <!-- column-name Players -->
-      <column type="gchararray"/>
-      <!-- column-name Ping -->
-      <column type="guint"/>
-      <!-- column-name Map -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkTextTagTable" id="text_tags">
     <child type="tag">

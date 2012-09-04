@@ -38,7 +38,7 @@ class Gameserver(object):
     
     self.pings = []
 
-    self.info = {}
+    self.info = { 'ip' : ip, 'port' : port, 'hostname' : '', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown'}
 
   def __reduce__(self):
     '''Magical pickle packer, creates a new "gameserver" instance with the following args'''
@@ -75,17 +75,17 @@ class Gameserver(object):
   def query(self):
     try:
       q = SourceLib.SourceQuery.SourceQuery(self.ip, self.port)
-      self.info = q.info()
-      if not self.info:
-        self.info = { 'ping' : 1000, 'ip' : self.ip }
+      info = q.info()
+      if info:
+        self.info.update(info)
+      else:
         return False, "Failed to connect to the server"
 
       if 'ping' in self.info:
         self.info['ping'] = int(self.info['ping'] * 1000)
       else:
-        self.info['ping'] = 1000
+        self.info['ping'] = 9001
 
-      self.info['ip'] = self.ip
       return True, ""
     except (SourceLib.SourceQuery.SourceQueryError, socket.gaierror) as e:
       error = e
@@ -94,7 +94,7 @@ class Gameserver(object):
     except socket.error as e:
       error = e
 
-    self.info['ping'] = 1000
+    self.info['ping'] = 9001
     return False, error
 
   def cleanup(self):
