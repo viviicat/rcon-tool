@@ -57,5 +57,5 @@ class RecentCommandManager(object):
 
     best_cmds = [tup for tup in sorted(self.commands.iteritems(), key=lambda(k, v) : (v, k))][:MAX_CMDS]
 
-    cPickle.dump(best_cmds, fcmds)
+    cPickle.dump(best_cmds, fcmds, 2)
     fcmds.close()

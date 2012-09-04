@@ -140,7 +140,7 @@ class ServerManager(object):
 
   def quit(self):
     prefs = open("servers.pkl", "w")
-    cPickle.dump(self.servers, prefs)
+    cPickle.dump(self.servers, prefs, 2)
     prefs.close()
 
     self.recentcmdmgr.quit()
