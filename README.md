@@ -36,7 +36,7 @@ For now, I'll provide instructions on how to run this on the latest distribution
 - clone the latest version on git
 - make sure main.py is executable
     -    chmod u+x main.py
-- double-clicking on the .desktop file should work
+- In order to use the .desktop file you'll need to open it in a text editor and get it to point to the proper paths.
 - alternatively, open a terminal. This will help catch bugs and exceptions due to my sloppy coding.
     -    cd path/to/rcontool/
     -    ./main.py
