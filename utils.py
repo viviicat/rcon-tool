@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #------------------------------------------------------------------------------
 
-
+from twisted.internet import threads
 
 import re, urllib
 
@@ -31,14 +31,24 @@ def is_valid_ip(input_str):
 def whatismyip(site='http://ipecho.net/plain'):
   global MY_IP
 
-  if not MY_IP:
-    print("Fetching new copy of public IP from " + site + "...")
-    MY_IP = urllib.urlopen(site).read()
-    print("Got " + MY_IP)
+  def post_fetch(site):
+    global MY_IP
+    ip = site.read()
+    print("Got " + ip)
+    # FIXME: better regex is possible
+    if is_valid_ip(ip):
+      MY_IP = ip
+      return ip
+    else:
+      print("Error: failed to fetch a valid public-facing IP address")
+      return None
 
-  # FIXME: better regex is possible
-  if is_valid_ip(MY_IP):
-    return MY_IP
+  if MY_IP:
+    return MY_IP, False
   else:
-    print("Error: failed to fetch a valid public-facing IP address")
-    return None
+    print("Fetching new copy of public IP from " + site + "...")
+    d = threads.deferToThread(urllib.urlopen, site)
+    d.addCallback(post_fetch)
+    return d, True
+
+
