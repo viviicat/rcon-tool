@@ -18,6 +18,7 @@
     <property name="label" translatable="yes">Remove Server</property>
     <property name="tooltip" translatable="yes">Remove selected server from the list</property>
     <property name="stock_id">gtk-remove</property>
+    <property name="sensitive">False</property>
     <signal name="activate" handler="on_act_remove_server_activate" swapped="no"/>
   </object>
   <object class="GtkToggleAction" id="act_toggle_logging">
@@ -25,6 +26,7 @@
     <property name="tooltip" translatable="yes">Whether or not to enable logging for the selected server</property>
     <property name="stock_id">gtk-disconnect</property>
     <property name="is_important">True</property>
+    <property name="sensitive">False</property>
     <signal name="toggled" handler="on_act_toggle_logging_toggled" swapped="no"/>
   </object>
   <object class="GtkAboutDialog" id="about_dialog">
@@ -304,60 +306,6 @@ Uses SourceLib Python RCON library.</property>
   </object>
   <object class="GtkListStore" id="liststore3"/>
   <object class="GtkListStore" id="liststore4"/>
-  <object class="GtkListStore" id="players_liststore">
-    <columns>
-      <!-- column-name player_name -->
-      <column type="gchararray"/>
-      <!-- column-name frags -->
-      <column type="guint"/>
-      <!-- column-name playtime -->
-      <column type="gchararray"/>
-      <!-- column-name client -->
-      <column type="guint"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">CSn| Benny Hill</col>
-        <col id="1">32</col>
-        <col id="2" translatable="yes">2:03</col>
-        <col id="3">3</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
-  <object class="GtkAdjustment" id="query_rate_adjustment">
-    <property name="upper">60</property>
-    <property name="value">1</property>
-    <property name="step_increment">0.10000000000000001</property>
-    <property name="page_increment">1</property>
-  </object>
-  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
-    <property name="model">recent_commands</property>
-    <property name="text_column">0</property>
-    <property name="inline_selection">True</property>
-  </object>
-  <object class="GtkListStore" id="recent_commands">
-    <columns>
-      <!-- column-name command -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="servers_liststore">
-    <columns>
-      <!-- column-name ip -->
-      <column type="gchararray"/>
-      <!-- column-name hostname -->
-      <column type="gchararray"/>
-      <!-- column-name players -->
-      <column type="gchararray"/>
-      <!-- column-name ping -->
-      <column type="guint"/>
-      <!-- column-name map -->
-      <column type="gchararray"/>
-      <!-- column-name connection_status_stock -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">400</property>
     <property name="height_request">450</property>
@@ -1664,6 +1612,44 @@ Uses SourceLib Python RCON library.</property>
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="players_liststore">
+    <columns>
+      <!-- column-name player_name -->
+      <column type="gchararray"/>
+      <!-- column-name frags -->
+      <column type="guint"/>
+      <!-- column-name playtime -->
+      <column type="gchararray"/>
+      <!-- column-name client -->
+      <column type="guint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">CSn| Benny Hill</col>
+        <col id="1">32</col>
+        <col id="2" translatable="yes">2:03</col>
+        <col id="3">3</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
+  <object class="GtkAdjustment" id="query_rate_adjustment">
+    <property name="upper">60</property>
+    <property name="value">1</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">1</property>
+  </object>
+  <object class="GtkListStore" id="recent_commands">
+    <columns>
+      <!-- column-name command -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
+    <property name="model">recent_commands</property>
+    <property name="text_column">0</property>
+    <property name="inline_selection">True</property>
+  </object>
   <object class="GtkMenu" id="server_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1705,6 +1691,22 @@ Uses SourceLib Python RCON library.</property>
         <property name="can_focus">False</property>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="servers_liststore">
+    <columns>
+      <!-- column-name ip -->
+      <column type="gchararray"/>
+      <!-- column-name hostname -->
+      <column type="gchararray"/>
+      <!-- column-name players -->
+      <column type="gchararray"/>
+      <!-- column-name ping -->
+      <column type="guint"/>
+      <!-- column-name map -->
+      <column type="gchararray"/>
+      <!-- column-name connection_status_stock -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkTextTagTable" id="text_tags">
     <child type="tag">

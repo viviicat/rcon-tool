@@ -313,7 +313,7 @@ class ServerManager(object):
 
 
   def set_logging_post_list(self, ret_tuple, server):
-    # FIXME: Not sure if this is run in a thread or not... So it potentially hangs the system, but I don't know
+    # FIXME: This is not run in a thread, so it hangs the system if connecting takes a while.
     success, response = ret_tuple
     if not success:
       self.bd.get_object("act_toggle_logging").set_active(False)
@@ -325,8 +325,8 @@ class ServerManager(object):
 
     ip = utils.whatismyip()
 
+
     for port in range(27020,27100):
-      # FIXME: this needs to be done linearly instead of sending all the requests at once, since we get errors
       try:
         self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
         for line in response.split('\n'):
@@ -438,6 +438,7 @@ class ServerManager(object):
           if not self.cur_server.rcon_connected():
             self.bd.get_object("rcon_notebook").set_current_page(0)
 
+          self.bd.get_object("act_remove_server").set_sensitive(True)
           return
 
     self.clear_server_display()
@@ -445,7 +446,9 @@ class ServerManager(object):
   def clear_server_display(self):
     self.bd.get_object("rcon_notebook").set_sensitive(False)
     self.populate_query_data()
-    self.bd.get_object("ping_graph").set_visible(False)
+    self.pinggraph.set_data(None)
+    self.bd.get_object("act_toggle_logging").set_sensitive(False)
+    self.bd.get_object("act_remove_server").set_sensitive(False)
 
   def add_server_item(self, server, connected=True):
     store = self.bd.get_object("servers_liststore")

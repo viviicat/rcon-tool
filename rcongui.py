@@ -32,7 +32,6 @@ class RconGui:
     self.bd.add_from_file("rcontool.glade")
     self.win = self.bd.get_object("main_window")
 
-    #FIXME: why do buttons appear in the "white" theme? :(
     nb = self.bd.get_object("server_info_box")
     nb.set_property("expand", False) # Seems to be a bug that glade overwrites this so let's just force it here
 
@@ -109,6 +108,7 @@ class RconGui:
     self.win.set_sensitive(False)
     win = self.bd.get_object("add_server_dialog")
     self.bd.get_object('ip_entry').set_text("")
+    self.bd.get_object("ip_entry").grab_focus()
     self.bd.get_object('port_entry').set_text("27015")
     self.bd.get_object("query_infobox").set_visible(False)
     self.bd.get_object("confirm_add_server").set_sensitive(True)
