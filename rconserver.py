@@ -38,7 +38,7 @@ class Gameserver(object):
     
     self.pings = []
 
-    self.info = { 'ip' : ip, 'port' : port, 'hostname' : '', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown'}
+    self.info = { 'ip' : ip, 'port' : port, 'hostname' : '???', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown'}
 
   def __reduce__(self):
     '''Magical pickle packer, creates a new "gameserver" instance with the following args'''

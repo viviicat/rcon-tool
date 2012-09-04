@@ -304,40 +304,43 @@ Uses SourceLib Python RCON library.</property>
   </object>
   <object class="GtkListStore" id="liststore3"/>
   <object class="GtkListStore" id="liststore4"/>
+  <object class="GtkListStore" id="players_liststore">
+    <columns>
+      <!-- column-name player_name -->
+      <column type="gchararray"/>
+      <!-- column-name frags -->
+      <column type="guint"/>
+      <!-- column-name playtime -->
+      <column type="gchararray"/>
+      <!-- column-name client -->
+      <column type="guint"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">CSn| Benny Hill</col>
+        <col id="1">32</col>
+        <col id="2" translatable="yes">2:03</col>
+        <col id="3">3</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
   <object class="GtkAdjustment" id="query_rate_adjustment">
     <property name="upper">60</property>
     <property name="value">1</property>
     <property name="step_increment">0.10000000000000001</property>
     <property name="page_increment">1</property>
   </object>
-  <object class="GtkListStore" id="players_liststore">
-    <columns>
-      <!-- column-name player_name -->
-      <column type="gchararray"/>
-      <!-- column-name steamid -->
-      <column type="gchararray"/>
-      <!-- column-name team -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">CSn| Benny Hill</col>
-        <col id="1" translatable="yes">STEAM_0:1:2345</col>
-        <col id="2" translatable="yes">Blue</col>
-      </row>
-    </data>
+  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
+    <property name="model">recent_commands</property>
+    <property name="text_column">0</property>
+    <property name="inline_selection">True</property>
   </object>
   <object class="GtkListStore" id="recent_commands">
     <columns>
       <!-- column-name command -->
       <column type="gchararray"/>
     </columns>
-  </object>
-  <object class="GtkTextBuffer" id="pretty_log_buffer"/>
-  <object class="GtkEntryCompletion" id="rcon_entrycompletion">
-    <property name="model">recent_commands</property>
-    <property name="text_column">0</property>
-    <property name="inline_selection">True</property>
   </object>
   <object class="GtkListStore" id="servers_liststore">
     <columns>
@@ -522,7 +525,7 @@ Uses SourceLib Python RCON library.</property>
                       <object class="GtkTreeViewColumn" id="ping">
                         <property name="resizable">True</property>
                         <property name="sizing">fixed</property>
-                        <property name="min_width">45</property>
+                        <property name="min_width">60</property>
                         <property name="max_width">80</property>
                         <property name="title" translatable="yes">Ping</property>
                         <property name="clickable">True</property>
@@ -1593,7 +1596,7 @@ Uses SourceLib Python RCON library.</property>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="treeviewcolumn6">
-                            <property name="title" translatable="yes">Steam ID</property>
+                            <property name="title" translatable="yes">Frags</property>
                             <child>
                               <object class="GtkCellRendererText" id="cellrenderertext7"/>
                               <attributes>
@@ -1604,11 +1607,22 @@ Uses SourceLib Python RCON library.</property>
                         </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="treeviewcolumn7">
-                            <property name="title" translatable="yes">Team</property>
+                            <property name="title" translatable="yes">Time</property>
                             <child>
                               <object class="GtkCellRendererText" id="cellrenderertext8"/>
                               <attributes>
                                 <attribute name="text">2</attribute>
+                              </attributes>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="treeviewcolumn8">
+                            <property name="title" translatable="yes">#</property>
+                            <child>
+                              <object class="GtkCellRendererText" id="cellrenderertext9"/>
+                              <attributes>
+                                <attribute name="text">3</attribute>
                               </attributes>
                             </child>
                           </object>

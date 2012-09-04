@@ -354,7 +354,7 @@ class ServerManager(object):
 
     for row in store:
       if store.get_value(row.iter, 0) == self.get_server_sid(server):
-        store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'], 5, Gtk.STOCK_CONNECT)
+        store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'], 5, Gtk.STOCK_CONNECT if success else Gtk.STOCK_DISCONNECT)
         break
 
     if success and self.cur_server and server is self.cur_server:
