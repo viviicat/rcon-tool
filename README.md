@@ -5,6 +5,8 @@ rcon-tool is an open-source tool written in Python and GTK+ for managing SRCDS s
 
 ![Screenshot of rcon-tool](/gavintlgold/rcon-tool/raw/master/interface.png)
 
+Ignore the ping, an annoying housemate was stealing my webs.
+
 Features
 --------
 
