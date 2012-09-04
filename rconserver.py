@@ -25,6 +25,8 @@ import socket
 
 import pinggraph
 
+def get_default_info():
+  return { 'ip' : '', 'port' : -1, 'hostname' : '???', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown', 'gamedesc' : 'Unknown'}
 
 class Gameserver(object):
   def __init__(self, ip, port, rcon_visible=False, rcon_password=None):
@@ -38,7 +40,10 @@ class Gameserver(object):
     
     self.pings = []
 
-    self.info = { 'ip' : ip, 'port' : port, 'hostname' : '???', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown'}
+    self.info = get_default_info()
+    self.info['ip'] = ip
+    self.info['port'] = port
+
 
   def __reduce__(self):
     '''Magical pickle packer, creates a new "gameserver" instance with the following args'''

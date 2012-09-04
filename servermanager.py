@@ -404,13 +404,12 @@ class ServerManager(object):
   def format_numplayers(self, info):
     return str(info['numplayers']) + "/" + str(info['maxplayers'])
 
-  def populate_query_data(self, info):
+  def populate_query_data(self, info=[]):
     labels = ['hostname', 'ip', 'port', 'map', 'gamedesc', 'ping']
     for l in labels:
-      if l in info:
-        self.bd.get_object(l+"_label").set_text(str(info[l]))
+      self.bd.get_object(l+"_label").set_text(str(info[l]) if l in info else "")
 
-    self.bd.get_object("players_label").set_text(self.format_numplayers(info))
+    self.bd.get_object("players_label").set_text(self.format_numplayers(info) if info else "")
 
 
   def on_show_rcon_toggle_toggled(self, widget):
@@ -427,21 +426,26 @@ class ServerManager(object):
     sel = widget.get_selection()
     if sel:
       model, itr = sel.get_selected()
-      sid = model.get_value(itr, 0)
+      if itr:
+        sid = model.get_value(itr, 0)
 
-      if sid in self.servers:
-        self.cur_server = self.servers[sid]
-        self.bd.get_object("rcon_notebook").set_sensitive(True)
-        self.query_server(self.cur_server)
-        self.populate_selected()
+        if sid in self.servers:
+          self.cur_server = self.servers[sid]
+          self.bd.get_object("rcon_notebook").set_sensitive(True)
+          self.query_server(self.cur_server)
+          self.populate_selected()
 
-        if not self.cur_server.rcon_connected():
-          self.bd.get_object("rcon_notebook").set_current_page(0)
+          if not self.cur_server.rcon_connected():
+            self.bd.get_object("rcon_notebook").set_current_page(0)
 
-        return
+          return
 
+    self.clear_server_display()
+
+  def clear_server_display(self):
     self.bd.get_object("rcon_notebook").set_sensitive(False)
-
+    self.populate_query_data()
+    self.bd.get_object("ping_graph").set_visible(False)
 
   def add_server_item(self, server, connected=True):
     store = self.bd.get_object("servers_liststore")
