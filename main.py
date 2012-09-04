@@ -20,7 +20,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #------------------------------------------------------------------------------
 
-from gi.repository import Gtk 
 from gi.repository import GObject
 
 
@@ -30,8 +29,8 @@ gtk3reactor.install()
 import rcongui
 from twisted.internet import reactor
 
-import os
-os.chdir("/home/gavin/rcontool")
+import os, sys
+os.chdir(sys.path[0])
 
 
 
