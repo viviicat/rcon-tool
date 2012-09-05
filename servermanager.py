@@ -174,6 +174,7 @@ class ServerManager(object):
     except:
       #TODO: error checking
       print("Invalid port")
+      return
     self.add_server(ip, port)
 
   def add_server(self, ip, port):
