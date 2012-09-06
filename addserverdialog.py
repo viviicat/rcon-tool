@@ -22,7 +22,7 @@
 
 from gi.repository import Gtk, GObject
 
-import rconserver, statusmanager
+import server, statusmanager
 
 DEFAULT_PORT = 27015
 
@@ -95,7 +95,7 @@ class AddServerDialog(object):
 
 
   def add_server(self, ip, port):
-    gs = rconserver.Gameserver(ip, port)
+    gs = server.Gameserver(ip, port)
     d = self.manager.add_server(gs)
     if d:
       d.addCallback(self.on_add_server_post_query, gs)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
-# rconserver - Class for managing a server in rcontool
+# server - Class for managing a server in rcontool
 # Copyright (c) 2012 Gavin Langdon <puttabutta@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
