@@ -98,33 +98,33 @@ class RconGui:
         self.bd.get_object("add_server_menu").popup(None, None, None, None, event.button, event.time)
       return True
 
-  def on_save_rcon_toggle_toggled(self, widget):
+  def on_save_rcon_toggle_toggled(self, save_rcon):
     pass
 
 
-  def on_cancel_add_server_clicked(self, widget):
+  def on_cancel_add_server_clicked(self, cancel_add_server):
     # get_window doesn't work here--next time it tries to show it fails. not sure why...
-    self.servermanager.close_server_dialog(widget.get_toplevel())
+    self.servermanager.close_server_dialog(cancel_add_server.get_toplevel())
 
-  def on_add_server_dialog_delete_event(self, widget, event):
-    self.servermanager.close_server_dialog(widget)
+  def on_add_server_dialog_delete_event(self, add_server_dialog, event):
+    self.servermanager.close_server_dialog(add_server_dialog)
     return True
 
-  def on_about_dialog_delete_event(self, widget, event):
-    widget.hide()
+  def on_about_dialog_delete_event(self, about_dialog, event):
+    about_dialog.hide()
     return True
 
-  def on_about_menuitem_activate(self, widget):
+  def on_about_menuitem_activate(self, about_menuitem):
     self.bd.get_object("about_dialog").show()
 
-  def on_about_dialog_response(self, widget, response_id):
-    widget.hide()
+  def on_about_dialog_response(self, about_dialog, response_id):
+    about_dialog.hide()
 
 
-  def on_main_window_destroy(self, widget):
+  def on_main_window_destroy(self, main_window):
     self.quit()
 
-  def on_act_quit_activate(self, widget):
+  def on_act_quit_activate(self, act_quit):
     self.quit()
 
   def quit(self):

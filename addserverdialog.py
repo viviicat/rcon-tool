@@ -51,7 +51,7 @@ class AddServerDialog(object):
 
     dic.update(d)
 
-  def on_confirm_add_server_clicked(self, widget):
+  def on_confirm_add_server_clicked(self, confirm_add_server):
     ip = self.ip_entry.get_text().strip()
     err = ""
     if not ip:
@@ -118,11 +118,11 @@ class AddServerDialog(object):
 
     GObject.timeout_add(1000, self.manager.on_query_timer, server)
 
-  def close_server_dialog(self, widget):
+  def close_server_dialog(self, server_dialog):
     self.main_window.set_sensitive(True)
-    widget.hide()
+    server_dialog.hide()
 
-  def on_act_add_server_activate(self, widget):
+  def on_act_add_server_activate(self, act_add_server):
     self.main_window.set_sensitive(False)
     self.ip_entry.set_text("")
     self.ip_entry.grab_focus()
@@ -132,12 +132,12 @@ class AddServerDialog(object):
 
     self.window.show()
 
-  def on_cancel_add_server_clicked(self, widget):
+  def on_cancel_add_server_clicked(self, cancel_add_server):
     # get_window doesn't work here--next time it tries to show it fails. not sure why...
-    self.close_server_dialog(widget.get_toplevel())
+    self.close_server_dialog(cancel_add_server.get_toplevel())
 
-  def on_add_server_dialog_delete_event(self, widget, event):
-    self.close_server_dialog(widget)
+  def on_add_server_dialog_delete_event(self, add_server_dialog, event):
+    self.close_server_dialog(add_server_dialog)
     return True
 
   def on_ip_entry_changed(self, ip_entry):

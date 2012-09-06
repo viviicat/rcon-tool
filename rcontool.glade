@@ -876,6 +876,7 @@ Uses SourceLib Python RCON library.</property>
                                             <property name="secondary_icon_tooltip_text" translatable="yes">Verify RCON Password</property>
                                             <property name="placeholder_text">Enter RCON Password...</property>
                                             <signal name="changed" handler="on_rcon_password_changed" swapped="no"/>
+                                            <signal name="activate" handler="on_rcon_password_activate" swapped="no"/>
                                             <signal name="icon-press" handler="on_rcon_password_icon_press" swapped="no"/>
                                           </object>
                                           <packing>

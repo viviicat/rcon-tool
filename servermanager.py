@@ -81,6 +81,7 @@ class ServerManager(object):
           'on_stick_to_bottom_toggled' : self.on_stick_to_bottom_toggled,
           'on_expand_player_list_clicked' : self.on_expand_player_list_clicked,
           'on_act_toggle_logging_toggled' : self.on_act_toggle_logging_toggled,
+          'on_rcon_password_activate' : self.on_rcon_password_activate,
         }
 
     self.addserverdialog = addserverdialog.AddServerDialog(self, builder, dic)
@@ -102,7 +103,7 @@ class ServerManager(object):
     self.textlogs[server] = ServerTextLog(self.text_tags)
     return self.query_server(server)
 
-  def on_expand_player_list_clicked(self, widget):
+  def on_expand_player_list_clicked(self, expand_player_list):
     pl = self.bd.get_object("players_window")
 
     self.bd.get_object("player_expander_arrow").set(Gtk.ArrowType.LEFT if pl.get_visible() else Gtk.ArrowType.RIGHT, Gtk.ShadowType.ETCHED_IN)
@@ -129,12 +130,12 @@ class ServerManager(object):
       self.append_to_log(server, command, 'local')
       self.append_to_log(server, response, 'remote')
 
-    widget = self.bd.get_object("rcon_password")
+    rcon_password = self.bd.get_object("rcon_password")
 
     if success:
-      widget.set_property("secondary-icon-stock", Gtk.STOCK_OK)
+      rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_OK)
     else:
-      widget.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_ERROR)
+      rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_ERROR)
 
     if not "Unknown command" in response:
       self.recentcmdmgr.addcmd(command)
@@ -158,17 +159,18 @@ class ServerManager(object):
 
     self.recentcmdmgr.quit()
 
-  def on_rcon_password_changed(self, widget):
-    enabled = widget.get_text() != ""
+  def on_rcon_password_changed(self, rcon_password):
+    enabled = rcon_password.get_text() != ""
+
     self.bd.get_object("rcon_notebook").set_show_tabs(enabled)
     self.bd.get_object("act_toggle_logging").set_sensitive(enabled)
-    widget.set_property("secondary-icon-sensitive", enabled)
-    widget.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_AUTHENTICATION)
+    rcon_password.set_property("secondary-icon-sensitive", enabled)
+    rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_AUTHENTICATION)
 
-    self.cur_server.set_rcon(widget.get_text())
+    self.cur_server.set_rcon(rcon_password.get_text())
 
 
-  def on_rcon_password_icon_press(self, widget, pos, event):
+  def on_rcon_password_icon_press(self, rcon_password, pos, event):
     self.test_rcon(self.cur_server)
 
   def test_rcon(self, server):
@@ -177,6 +179,9 @@ class ServerManager(object):
       return self.log_rcon(server, "version")
     return False
 
+
+  def on_rcon_password_activate(self, rcon_password):
+    self.test_rcon(self.cur_server)
 
 
   def on_query_timer(self, server):
@@ -199,7 +204,7 @@ class ServerManager(object):
   def get_sid(self, ip, port):
     return ip + ":" + str(port)
 
-  def on_act_remove_server_activate(self, widget):
+  def on_act_remove_server_activate(self, act_remove_server):
     if self.cur_server:
       self.delete_server(self.cur_server)
 
@@ -234,30 +239,30 @@ class ServerManager(object):
     d.addCallback(self.on_query_result, server)
     return d
 
-  def on_rcon_input_activate(self, widget):
-    text = widget.get_text()
+  def on_rcon_input_activate(self, rcon_input):
+    text = rcon_input.get_text()
     if text == "" or not self.cur_server:
       return
 
     self.log_rcon(self.cur_server, text)
-    widget.set_text("")
+    rcon_input.set_text("")
 
-  def on_rcon_input_changed(self, widget):
-    widget.set_icon_sensitive(1, widget.get_text())
+  def on_rcon_input_changed(self, rcon_input):
+    rcon_input.set_icon_sensitive(1, rcon_input.get_text())
 
-  def on_rcon_input_icon_press(self, widget, pos, event):
-    if widget.get_text():
-      self.log_rcon(self.cur_server, 'find ' + widget.get_text())
+  def on_rcon_input_icon_press(self, rcon_input, pos, event):
+    if rcon_input.get_text():
+      self.log_rcon(self.cur_server, 'find ' + rcon_input.get_text())
 
-  def on_act_toggle_logging_toggled(self, widget):
+  def on_act_toggle_logging_toggled(self, act_toggle_logging):
     if not self.cur_server:
       return
 
-    self.set_logging(self.cur_server, widget.get_active())
+    self.set_logging(self.cur_server, act_toggle_logging.get_active())
 
-    widget.set_stock_id(Gtk.STOCK_CONNECT if widget.get_active() else Gtk.STOCK_DISCONNECT)
+    act_toggle_logging.set_stock_id(Gtk.STOCK_CONNECT if act_toggle_logging.get_active() else Gtk.STOCK_DISCONNECT)
 
-    if widget.get_active():
+    if act_toggle_logging.get_active():
       self.bd.get_object("rcon_notebook").set_current_page(1)
 
   def set_logging(self, server, enabled):
@@ -341,14 +346,14 @@ class ServerManager(object):
     GObject.idle_add(self._stick_check)
 
   def _stick_check(self):
-    widget = self.bd.get_object("server_log_textview")
+    log_tv = self.bd.get_object("server_log_textview")
 
     if self.bd.get_object("stick_to_bottom").get_active():
-      adj = widget.get_vadjustment()
+      adj = log_tv.get_vadjustment()
       adj.set_value(adj.get_upper())
 
-  def on_stick_to_bottom_toggled(self, widget):
-    if self.cur_server and widget.get_active():
+  def on_stick_to_bottom_toggled(self, stick_to_bottom):
+    if self.cur_server and stick_to_bottom.get_active():
       self.stick_check()
 
   def populate_selected(self):
@@ -383,8 +388,8 @@ class ServerManager(object):
     self.bd.get_object("players_label").set_text(self.format_numplayers(info) if info else "")
 
 
-  def on_show_rcon_toggle_toggled(self, widget):
-    self.set_show_rcon(widget.get_active())
+  def on_show_rcon_toggle_toggled(self, show_rcon_toggle):
+    self.set_show_rcon(show_rcon_toggle.get_active())
 
 
   def set_show_rcon(self, enabled):
@@ -393,8 +398,8 @@ class ServerManager(object):
     if self.cur_server:
       self.cur_server.set_rcon_visibility(enabled)
 
-  def on_server_list_cursor_changed(self, widget):
-    sel = widget.get_selection()
+  def on_server_list_cursor_changed(self, server_list):
+    sel = server_list.get_selection()
     if sel:
       model, itr = sel.get_selected()
       if itr:

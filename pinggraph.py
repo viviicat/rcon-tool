@@ -39,12 +39,12 @@ class PingGraph(object):
     self.darea.queue_draw_area(0, 0, rect.width, rect.height)
     self.darea.set_visible(True)
 
-  def on_ping_graph_draw(self, widget, cx):
-    widget.set_visible(self.data != None)
+  def on_ping_graph_draw(self, ping_graph, cx):
+    ping_graph.set_visible(self.data != None)
     if not self.data:
       return
 
-    rect = widget.get_allocation()
+    rect = ping_graph.get_allocation()
     
     cx.set_source_rgb(1.0,1.0,1.0)
     cx.paint()
