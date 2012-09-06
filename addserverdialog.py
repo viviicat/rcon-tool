@@ -26,6 +26,7 @@ import server, statusmanager
 DEFAULT_PORT = 27015
 
 class AddServerDialog(object):
+  '''Manages all the functions relating to the dialog for adding servers'''
   def __init__(self, manager, builder, dic):
     self.ip_entry = builder.get_object("ip_entry")
     self.port_entry = builder.get_object("port_entry")
@@ -51,14 +52,17 @@ class AddServerDialog(object):
     dic.update(d)
 
   def on_confirm_add_server_clicked(self, confirm_add_server):
+    # Verify ip and port are valid and filled out
     ip = self.ip_entry.get_text().strip()
     err = ""
     if not ip:
       err = "Please enter a valid IP."
 
+    # If port entry is empty assume default port
     if not self.port_entry.get_text().strip():
-      self.port_entry.set_text("27015")
+      self.port_entry.set_text(str(DEFAULT_PORT))
 
+    # Attempt to convert the text into an integer
     try:
       port = int(self.port_entry.get_text().strip())
     except:
@@ -73,17 +77,18 @@ class AddServerDialog(object):
     self.add_server(ip, port)
 
   def send_message(self, text="", msg_type="info"):
+    '''Handles the notification box, showing and hiding the spinner and setting the notifcation type.
+    Leaving 'text' blank will hide the message'''
     self.query_infobox.set_visible(text != "")
-
     if not text:
       return
-
 
     types = {"load" : Gtk.MessageType.INFO, 
              "info" : Gtk.MessageType.INFO, 
              "error" : Gtk.MessageType.ERROR, 
              "warning" : Gtk.MessageType.WARNING}
 
+    # Default type is info
     if msg_type not in types:
       msg_type = "info"
 
@@ -94,35 +99,38 @@ class AddServerDialog(object):
 
 
   def add_server(self, ip, port):
+    '''Create a server and query to check if the server can be reached'''
+    def post_query(ret_tuple, server):
+      success, errval = ret_tuple
+      if not success:
+        self.send_message(str(errval), "error")
+        self.confirm_add_server.set_sensitive(True)
+        self.manager.delete_server(server)
+        return
+
+      statusmanager.push_status("Added server "+self.manager.get_server_sid(server)+".")
+      self.manager.add_server_item(server)
+      self.close_server_dialog(self.window)
+
+      # Begin querying the server on a timer
+      self.manager.init_query_timer(server)
+      
     gs = server.Gameserver(ip, port)
     d = self.manager.add_server(gs)
     if d:
-      d.addCallback(self.on_add_server_post_query, gs)
+      d.addCallback(post_query, gs)
    
       self.send_message("Querying server...", "load")
       self.confirm_add_server.set_sensitive(False)
     else:
       self.send_message("Server is already in the list.", "warning")
 
-  def on_add_server_post_query(self, ret_tuple, server):
-    success, errval = ret_tuple
-    if not success:
-      self.send_message(str(errval), "error")
-      self.confirm_add_server.set_sensitive(True)
-      self.manager.delete_server(server)
-      return
-
-    statusmanager.push_status("Added server "+self.manager.get_server_sid(server)+".")
-    self.manager.add_server_item(server)
-    self.close_server_dialog(self.window)
-
-    self.manager.init_query_timer(server)
-
   def close_server_dialog(self, server_dialog):
     self.main_window.set_sensitive(True)
     server_dialog.hide()
 
   def on_act_add_server_activate(self, act_add_server):
+    '''Called when the "add server" action is activated, which triggers opening the dialog'''
     self.main_window.set_sensitive(False)
     self.ip_entry.set_text("")
     self.ip_entry.grab_focus()
@@ -133,15 +141,16 @@ class AddServerDialog(object):
     self.window.show()
 
   def on_cancel_add_server_clicked(self, cancel_add_server):
-    # get_window doesn't work here--next time it tries to show it fails. not sure why...
-    self.close_server_dialog(cancel_add_server.get_toplevel())
+    self.close_server_dialog(self.window)
 
   def on_add_server_dialog_delete_event(self, add_server_dialog, event):
+    '''Called when x button pressed in the window, return True to not delete the window'''
     self.close_server_dialog(add_server_dialog)
     return True
 
   def on_ip_entry_changed(self, ip_entry):
-    '''Ensures if the user tries to type a port the contents get redirected to the port field'''
+    '''Ensures if the user tries to type a port or paste a server:port pair the port gets
+    redirected to the port field'''
     text = ip_entry.get_text()
     if ":" not in text:
       return
