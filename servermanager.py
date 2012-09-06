@@ -53,6 +53,14 @@ class ServerManager(object):
   query threads and other deferred events, as well as the text buffers
   '''
   def __init__(self, builder, dic, gui):
+    def cb(ret_tuple, server):
+      success, errval = ret_tuple
+
+      self.add_server_item(server, success)
+      self.init_query_timer(server)
+
+    #--------------------------------------------------
+
     self.bd = builder
     try:
       prefs = open("servers.pkl", "r")
@@ -74,7 +82,7 @@ class ServerManager(object):
 
     for s in self.servers.values():
       d = self.init_server(s)
-      d.addCallback(self.on_init_post_query_server, s)
+      d.addCallback(cb, s)
 
 
     d = { 'on_rcon_password_icon_press' : self.on_rcon_password_icon_press,
@@ -223,20 +231,19 @@ class ServerManager(object):
 
     return True
 
+
   def init_query_timer(self, server):
     GObject.timeout_add(QUERY_DELAY, self.on_query_timer, server)
 
-  def on_init_post_query_server(self, ret_tuple, server):
-    success, errval = ret_tuple
 
-    self.add_server_item(server, success)
-    self.init_query_timer(server)
 
   def get_server_sid(self, server):
     return self.get_sid(server.ip, server.port)
 
+
   def get_sid(self, ip, port):
     return ip + ":" + str(port)
+
 
   def on_act_remove_server_activate(self, act_remove_server):
     if self.cur_server:
@@ -244,8 +251,10 @@ class ServerManager(object):
       self.delete_sid(sid)
       statusmanager.push_status("Deleted server "+sid+".")
 
+
   def delete_server(self, server):
     self.delete_sid(self.get_server_sid(server))
+
 
   def delete_sid(self, sid):
     if sid in self.servers:
