@@ -20,8 +20,6 @@
 #------------------------------------------------------------------------------
 
 
-from gi.repository import Gtk, GObject
-
 import server, statusmanager
 
 DEFAULT_PORT = 27015
@@ -117,7 +115,7 @@ class AddServerDialog(object):
     self.manager.add_server_item(server)
     self.close_server_dialog(self.window)
 
-    GObject.timeout_add(1000, self.manager.on_query_timer, server)
+    self.manager.init_query_timer(server)
 
   def close_server_dialog(self, server_dialog):
     self.main_window.set_sensitive(True)

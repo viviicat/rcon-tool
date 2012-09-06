@@ -81,6 +81,7 @@ class Gameserver(object):
     try:
       q = SourceLib.SourceQuery.SourceQuery(self.ip, self.port)
       info = q.info()
+      #print(q.player())
       if info:
         self.info.update(info)
       else:

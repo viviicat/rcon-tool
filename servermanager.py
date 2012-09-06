@@ -37,6 +37,10 @@ import statusmanager
 
 import SourceLib
 
+# wait 2 seconds between queries (default max queries per second per ip is 3, so let's reduce
+# the probability that we'll hit that)
+QUERY_DELAY = 2000
+
 class ServerTextLog(object):
   def __init__(self, tagtable):
     self.log_buffer = Gtk.TextBuffer(tag_table=tagtable)
@@ -198,17 +202,21 @@ class ServerManager(object):
 
   def on_query_timer(self, server):
     if server not in self.servers.values():
+      print("nope!")
       return False
 
     self.query_server(server)
 
     return True
 
+  def init_query_timer(self, server):
+    GObject.timeout_add(QUERY_DELAY, self.on_query_timer, server)
+
   def on_init_post_query_server(self, ret_tuple, server):
     success, errval = ret_tuple
 
     self.add_server_item(server, success)
-    GObject.timeout_add(1000, self.on_query_timer, server)
+    self.init_query_timer(server)
 
   def get_server_sid(self, server):
     return self.get_sid(server.ip, server.port)
