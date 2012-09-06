@@ -420,11 +420,11 @@ class ServerManager(object):
     # handle the case where we have players already in the list
     # by setting instead of deleting and adding, we should avoid deselection or messiness
     for row in store:
-      p_index = store.get_value(row.iter, 0)
+      p_index = store.get_value(row.iter, 0) - 1
       if p_index < len(players):
         plr = players[p_index]
         # time is in seconds, convert to h:m:s (this mods by one day, oh noes)
-        store.set(row.iter, 1, plr['name'], 2, plr['kills'], 3, get_play_time_string(plr['time']))
+        store.set(row.iter, 1, plr['name'] if plr['name'] else '< Connecting... >', 2, plr['kills'], 3, get_play_time_string(plr['time']))
       else:
         # handle the case where a player on the list has left
         store.remove(row.iter)
@@ -432,7 +432,7 @@ class ServerManager(object):
     if len(players) > len(store):
       for i in xrange(len(store), len(players)):
         player = players[i]
-        store.append([i, player['name'], player['kills'], get_play_time_string(player['time'])])
+        store.append([i+1, player['name'] if player['name'] else '< Connecting... >', player['kills'], get_play_time_string(player['time'])])
 
   def on_show_rcon_toggle_toggled(self, show_rcon_toggle):
     self.set_show_rcon(show_rcon_toggle.get_active())

@@ -622,7 +622,7 @@ Uses SourceLib Python RCON library.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="xalign">1</property>
-                                    <property name="label" translatable="yes">Game Mod:</property>
+                                    <property name="label" translatable="yes">Game:</property>
                                   </object>
                                   <packing>
                                     <property name="top_attach">3</property>
@@ -1635,14 +1635,6 @@ Uses SourceLib Python RCON library.</property>
       <!-- column-name playtime -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0">3</col>
-        <col id="1" translatable="yes">CSn| Benny Hill</col>
-        <col id="2">32</col>
-        <col id="3" translatable="yes">2:03</col>
-      </row>
-    </data>
   </object>
   <object class="GtkTextBuffer" id="pretty_log_buffer"/>
   <object class="GtkAdjustment" id="query_rate_adjustment">
