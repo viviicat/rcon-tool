@@ -22,7 +22,7 @@
 
 from gi.repository import Gtk, GObject
 
-import rconserver
+import rconserver, statusmanager
 
 DEFAULT_PORT = 27015
 
@@ -113,6 +113,7 @@ class AddServerDialog(object):
       self.manager.delete_server(server)
       return
 
+    statusmanager.push_status("Added server "+self.manager.get_server_sid(server)+".")
     self.manager.add_server_item(server)
     self.close_server_dialog(self.window)
 

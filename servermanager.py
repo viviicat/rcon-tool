@@ -33,6 +33,8 @@ import recentcommands
 import pinggraph
 import addserverdialog
 
+import statusmanager
+
 import SourceLib
 
 class ServerTextLog(object):
@@ -176,9 +178,19 @@ class ServerManager(object):
   def test_rcon(self, server):
     if server:
       server.set_rcon(self.bd.get_object("rcon_password").get_text())
-      return self.log_rcon(server, "version")
+      d = self.log_rcon(server, "version")
+      d.addCallback(self.test_rcon_cb)
+      return d
     return False
 
+  def test_rcon_cb(self, ret_tuple):
+    success, response = ret_tuple
+    if success:
+      statusmanager.push_status("RCON Password test succeeded.")
+    else:
+      statusmanager.push_status("RCON Password test failed.")
+
+    return ret_tuple
 
   def on_rcon_password_activate(self, rcon_password):
     self.test_rcon(self.cur_server)
@@ -206,7 +218,9 @@ class ServerManager(object):
 
   def on_act_remove_server_activate(self, act_remove_server):
     if self.cur_server:
-      self.delete_server(self.cur_server)
+      sid = self.get_server_sid(self.cur_server)
+      self.delete_sid(sid)
+      statusmanager.push_status("Deleted server "+sid+".")
 
   def delete_server(self, server):
     self.delete_sid(self.get_server_sid(server))
@@ -224,10 +238,12 @@ class ServerManager(object):
         del self.loggers[server]
       del self.servers[sid]
 
-      store = self.bd.get_object("servers_liststore")
     else:
-      print("server with sid '"+sid+"' not found to delete")
+      msg = "Server with sid '"+sid+"' not found to delete."
+      print(msg)
+      statusmanager.push_status(msg)
 
+    store = self.bd.get_object("servers_liststore")
     for row in store:
       if store.get_value(row.iter, 0) == sid:
         store.remove(row.iter)
@@ -278,6 +294,7 @@ class ServerManager(object):
     elif server in self.loggers:
       self.loggers[server].stopListening()
       del self.loggers[server]
+      statusmanager.push_status("Disabled logging from "+self.get_server_sid(server)+".")
 
 
   def set_logging_post_list(self, ret_tuple, server):
@@ -303,6 +320,7 @@ class ServerManager(object):
               self.log_rcon(server, 'logaddress_del ' + line, False)
 
           self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
+          statusmanager.push_status("Enabled logging from "+self.get_server_sid(server)+".")
           break
 
         except twisted.internet.error.CannotListenError:
@@ -430,5 +448,6 @@ class ServerManager(object):
     store = self.bd.get_object("servers_liststore")
     iter = store.append([self.get_server_sid(server), server.info['hostname'],str(server.info['numplayers']) + "/" + str(server.info['maxplayers']), server.info['ping'], server.info['map'], Gtk.STOCK_CONNECT if connected else Gtk.STOCK_DISCONNECT])
     self.bd.get_object("server_list").set_cursor(store.get_path(iter))
+
 
 

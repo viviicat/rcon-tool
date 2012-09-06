@@ -25,6 +25,8 @@ from gi.repository import Gtk
 from twisted.internet import reactor
 
 import servermanager
+import statusmanager
+
 
 class RconGui:
   def __init__(self):
@@ -66,6 +68,8 @@ class RconGui:
     slot = self.bd.get_object("manual_toolbar_slot")
     slot.set_property("expand", False)
     slot.pack_start(toolbar, False, True, 0)
+
+    statusmanager.set_statusbar(self.bd.get_object("statusbar"))
 
     dic = { 
         'on_save_rcon_toggle_toggled' : self.on_save_rcon_toggle_toggled,
