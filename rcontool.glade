@@ -117,7 +117,6 @@ Uses SourceLib Python RCON library.</property>
                     <property name="label" translatable="yes">Querying server...</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
-                      <attribute name="foreground" value="#5f5f5f5f5f5f"/>
                     </attributes>
                   </object>
                   <packing>
@@ -189,6 +188,7 @@ Uses SourceLib Python RCON library.</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
                 <property name="secondary_icon_tooltip_text" translatable="yes">Entered IP is not valid</property>
+                <signal name="changed" handler="on_ip_entry_changed" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

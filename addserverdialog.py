@@ -24,6 +24,8 @@ from gi.repository import Gtk, GObject
 
 import rconserver
 
+DEFAULT_PORT = 27015
+
 class AddServerDialog(object):
   def __init__(self, manager, builder, dic):
     self.ip_entry = builder.get_object("ip_entry")
@@ -44,20 +46,29 @@ class AddServerDialog(object):
         'on_add_server_dialog_delete_event' : self.on_add_server_dialog_delete_event,
         'on_cancel_add_server_clicked' : self.on_cancel_add_server_clicked,
         'on_act_add_server_activate' : self.on_act_add_server_activate,
+        'on_ip_entry_changed' : self.on_ip_entry_changed,
         }
 
     dic.update(d)
 
   def on_confirm_add_server_clicked(self, widget):
-    ip = self.ip_entry.get_text()
+    ip = self.ip_entry.get_text().strip()
+    err = ""
     if not ip:
-      return
+      err = "Please enter a valid IP."
+
+    if not self.port_entry.get_text().strip():
+      self.port_entry.set_text("27015")
 
     try:
-      port = int(self.port_entry.get_text())
+      port = int(self.port_entry.get_text().strip())
     except:
-      #TODO: error checking
-      print("Invalid port")
+      if err:
+        err += "\n"
+      err += "Please enter a valid port."
+
+    if err:
+      self.send_message(err, "error")
       return
 
     self.add_server(ip, port)
@@ -128,5 +139,20 @@ class AddServerDialog(object):
   def on_add_server_dialog_delete_event(self, widget, event):
     self.close_server_dialog(widget)
     return True
+
+  def on_ip_entry_changed(self, ip_entry):
+    '''Ensures if the user tries to type a port the contents get redirected to the port field'''
+    text = ip_entry.get_text()
+    if ":" not in text:
+      return
+
+    port_index = text.index(":")
+    port_str = text[port_index+1:]
+
+    ip_entry.set_text(text[:port_index])
+    if port_str:
+      self.port_entry.set_text(port_str)
+
+    self.port_entry.grab_focus()
 
 
