@@ -45,7 +45,6 @@ class RconGui:
     statusmanager.set_statusbar(self.bd.get_object("statusbar"))
 
     dic = { 
-        'on_save_rcon_toggle_toggled' : self.on_save_rcon_toggle_toggled,
         'on_about_dialog_delete_event' : self.on_about_dialog_delete_event,
         'on_about_dialog_response' : self.on_about_dialog_response,
         'on_main_window_destroy' : self.on_main_window_destroy,
@@ -106,10 +105,6 @@ class RconGui:
       else:
         self.bd.get_object("add_server_menu").popup(None, None, None, None, event.button, event.time)
       return True
-
-  def on_save_rcon_toggle_toggled(self, save_rcon_toggle):
-    if self.cur_server:
-      self.cur_server.save_rcon = save_rcon_toggle.get_active()
 
 
   def on_cancel_add_server_clicked(self, cancel_add_server):

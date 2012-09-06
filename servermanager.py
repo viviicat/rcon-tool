@@ -349,6 +349,7 @@ class ServerManager(object):
 
     # update ping graph whether or not this query worked
     server.add_ping_history()
+    self.pinggraph.queue_draw()
 
     store = self.bd.get_object("servers_liststore")
 
