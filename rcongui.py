@@ -69,7 +69,6 @@ class RconGui:
 
     dic = { 
         'on_save_rcon_toggle_toggled' : self.on_save_rcon_toggle_toggled,
-        'on_act_add_server_activate' : self.on_act_add_server_activate,
         'on_about_dialog_delete_event' : self.on_about_dialog_delete_event,
         'on_about_dialog_response' : self.on_about_dialog_response,
         'on_main_window_destroy' : self.on_main_window_destroy,
@@ -102,16 +101,6 @@ class RconGui:
   def on_save_rcon_toggle_toggled(self, widget):
     pass
 
-  def on_act_add_server_activate(self, widget):
-    self.win.set_sensitive(False)
-    win = self.bd.get_object("add_server_dialog")
-    self.bd.get_object('ip_entry').set_text("")
-    self.bd.get_object("ip_entry").grab_focus()
-    self.bd.get_object('port_entry').set_text("27015")
-    self.bd.get_object("query_infobox").set_visible(False)
-    self.bd.get_object("confirm_add_server").set_sensitive(True)
-
-    win.show()
 
   def on_cancel_add_server_clicked(self, widget):
     # get_window doesn't work here--next time it tries to show it fails. not sure why...
