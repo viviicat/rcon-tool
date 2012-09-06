@@ -913,7 +913,6 @@ Uses SourceLib Python RCON library.</property>
                                                 <property name="label" translatable="yes">Save</property>
                                                 <property name="use_action_appearance">False</property>
                                                 <property name="visible">True</property>
-                                                <property name="sensitive">False</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
                                                 <property name="tooltip_text" translatable="yes">Whether or not to save the RCON password between sessions</property>
@@ -1529,6 +1528,9 @@ Uses SourceLib Python RCON library.</property>
                         <property name="can_focus">True</property>
                         <property name="model">players_liststore</property>
                         <property name="reorderable">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection" id="treeview-selection3"/>
+                        </child>
                         <child>
                           <object class="GtkTreeViewColumn" id="treeviewcolumn5">
                             <property name="title" translatable="yes">Name</property>

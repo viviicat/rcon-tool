@@ -29,46 +29,19 @@ import statusmanager
 
 
 class RconGui:
+  '''Manages the main GUI functions for rcontool'''
   def __init__(self):
     self.bd = Gtk.Builder()
     self.bd.add_from_file("rcontool.glade")
     self.win = self.bd.get_object("main_window")
 
     nb = self.bd.get_object("server_info_box")
-    nb.set_property("expand", False) # Seems to be a bug that glade overwrites this so let's just force it here
+    # Force this box to stay small since it likes to expand
+    nb.set_property("expand", False) 
 
     self.text_tags = self.bd.get_object("text_tags")
 
-    # manually create a toolbar since Glade doesn't properly support PRIMARY_TOOLBAR style
-    addbutton = Gtk.ToolButton(stock_id=Gtk.STOCK_ADD, label="Add Server...", is_important=True)
-    addbutton.set_related_action(self.bd.get_object("act_add_server"))
-    addbutton.set_use_action_appearance(True)
-    removebutton = Gtk.ToolButton(stock_id=Gtk.STOCK_REMOVE, label="Remove Server")
-    removebutton.set_related_action(self.bd.get_object("act_remove_server"))
-    removebutton.set_use_action_appearance(True)
-
-    separator = Gtk.SeparatorToolItem(draw=False)
-    separator.set_expand(True)
-
-    log_switch = Gtk.ToggleToolButton()
-    log_switch.set_related_action(self.bd.get_object("act_toggle_logging"))
-    log_switch.set_use_action_appearance(True)
-
-
-    toolbar = Gtk.Toolbar()
-    toolb_style = toolbar.get_style_context()
-    toolb_style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
-
-    toolbar.insert(addbutton, 0)
-    toolbar.insert(removebutton, 1)
-    toolbar.insert(separator, 2)
-    toolbar.insert(log_switch, 3)
-    toolbar.show_all()
-    #toolbar.insert(self.bd.get_object("logging_box"), 3)
-    slot = self.bd.get_object("manual_toolbar_slot")
-    slot.set_property("expand", False)
-    slot.pack_start(toolbar, False, True, 0)
-
+    self.setup_toolbar()
     statusmanager.set_statusbar(self.bd.get_object("statusbar"))
 
     dic = { 
@@ -83,27 +56,60 @@ class RconGui:
 
     self.servermanager = servermanager.ServerManager(self.bd, dic, self)
 
-
     self.bd.connect_signals(dic)
 
     self.win.show()
 
+  def setup_toolbar(self):
+    '''Manually create a toolbar since Glade doesn't properly support 
+    PRIMARY_TOOLBAR style'''
+    addbutton = Gtk.ToolButton(stock_id=Gtk.STOCK_ADD, label="Add Server...", is_important=True)
+    addbutton.set_related_action(self.bd.get_object("act_add_server"))
+    addbutton.set_use_action_appearance(True)
+    removebutton = Gtk.ToolButton(stock_id=Gtk.STOCK_REMOVE, label="Remove Server")
+    removebutton.set_related_action(self.bd.get_object("act_remove_server"))
+    removebutton.set_use_action_appearance(True)
+
+    separator = Gtk.SeparatorToolItem(draw=False)
+    separator.set_expand(True)
+
+    log_switch = Gtk.ToggleToolButton()
+    log_switch.set_related_action(self.bd.get_object("act_toggle_logging"))
+    log_switch.set_use_action_appearance(True)
+
+    toolbar = Gtk.Toolbar()
+    toolb_style = toolbar.get_style_context()
+    toolb_style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
+
+    toolbar.insert(addbutton, 0)
+    toolbar.insert(removebutton, 1)
+    toolbar.insert(separator, 2)
+    toolbar.insert(log_switch, 3)
+    toolbar.show_all()
+    slot = self.bd.get_object("manual_toolbar_slot")
+    slot.set_property("expand", False)
+    slot.pack_start(toolbar, False, True, 0)
+
   def on_server_list_button_press_event(self, treeview, event):
+    # If the user right clicks, show them a menu
     if event.button == 3:
       x = int(event.x)
       y = int(event.y)
       pthinfo = treeview.get_path_at_pos(x, y)
+      # If the user has a server in mind, show the server menu
       if pthinfo is not None:
         path, col, cellx, celly = pthinfo
         treeview.grab_focus()
         treeview.set_cursor( path, col, 0)
         self.bd.get_object("server_menu").popup(None, None, None, None, event.button, event.time)
+      # Otherwise we just need to show the add server menu
       else:
         self.bd.get_object("add_server_menu").popup(None, None, None, None, event.button, event.time)
       return True
 
-  def on_save_rcon_toggle_toggled(self, save_rcon):
-    pass
+  def on_save_rcon_toggle_toggled(self, save_rcon_toggle):
+    if self.cur_server:
+      self.cur_server.save_rcon = save_rcon_toggle.get_active()
 
 
   def on_cancel_add_server_clicked(self, cancel_add_server):

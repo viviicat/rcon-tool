@@ -29,7 +29,7 @@ def get_default_info():
   return { 'ip' : '', 'port' : -1, 'hostname' : '???', 'numplayers' : 0, 'maxplayers' : 0, 'ping' : 1000, 'map' : 'Unknown', 'gamedesc' : 'Unknown'}
 
 class Gameserver(object):
-  def __init__(self, ip, port, rcon_visible=False, rcon_password=None):
+  def __init__(self, ip, port, rcon_visible=False, rcon_password=None, save_rcon=True):
     self.ip = ip
     self.port = port
     self.rcon_visible = rcon_visible
@@ -46,10 +46,11 @@ class Gameserver(object):
 
     self.player = []
 
+    self.save_rcon = save_rcon
 
   def __reduce__(self):
     '''Magical pickle packer, creates a new "gameserver" instance with the following args'''
-    return Gameserver, (self.ip,self.port,self.rcon_visible,self.rcon_password)
+    return Gameserver, (self.ip,self.port,self.rcon_visible, self.rcon_password if self.save_rcon else None, self.save_rcon)
 
   def __key(self):
     return (self.ip, self.port)

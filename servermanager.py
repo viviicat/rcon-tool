@@ -79,6 +79,7 @@ class ServerManager(object):
 
     d = { 'on_rcon_password_icon_press' : self.on_rcon_password_icon_press,
           'on_act_remove_server_activate' : self.on_act_remove_server_activate,
+          'on_save_rcon_toggle_toggled' : self.on_save_rcon_toggle_toggled,
           'on_rcon_input_activate' : self.on_rcon_input_activate,
           'on_rcon_input_icon_press' : self.on_rcon_input_icon_press,
           'on_rcon_input_changed' : self.on_rcon_input_changed,
@@ -348,7 +349,6 @@ class ServerManager(object):
 
     # update ping graph whether or not this query worked
     server.add_ping_history()
-    self.pinggraph.queue_draw()
 
     store = self.bd.get_object("servers_liststore")
 
@@ -391,6 +391,8 @@ class ServerManager(object):
     self.stick_check()
 
     self.pinggraph.set_data(self.cur_server.pings)
+
+    self.bd.get_object("save_rcon_toggle").set_active(self.cur_server.save_rcon)
 
     tv2 = self.bd.get_object("pretty_log_textview")
     tv2.set_buffer(self.textlogs[self.cur_server].pretty_buffer)
@@ -444,6 +446,11 @@ class ServerManager(object):
     if self.cur_server:
       self.cur_server.set_rcon_visibility(enabled)
 
+  def on_save_rcon_toggle_toggled(self, save_rcon_toggle):
+    if self.cur_server:
+      self.cur_server.save_rcon = save_rcon_toggle.get_active()
+
+
   def on_server_list_cursor_changed(self, server_list):
     sel = server_list.get_selection()
     if sel:
@@ -471,6 +478,7 @@ class ServerManager(object):
     self.pinggraph.set_data(None)
     self.bd.get_object("act_toggle_logging").set_sensitive(False)
     self.bd.get_object("act_remove_server").set_sensitive(False)
+    self.bd.get_object("save_rcon_toggle").set_active(True)
 
   def add_server_item(self, server, connected=True):
     store = self.bd.get_object("servers_liststore")
