@@ -70,8 +70,6 @@ class RconGui:
     dic = { 
         'on_save_rcon_toggle_toggled' : self.on_save_rcon_toggle_toggled,
         'on_act_add_server_activate' : self.on_act_add_server_activate,
-        'on_cancel_add_server_clicked' : self.on_cancel_add_server_clicked,
-        'on_add_server_dialog_delete_event' : self.on_add_server_dialog_delete_event,
         'on_about_dialog_delete_event' : self.on_about_dialog_delete_event,
         'on_about_dialog_response' : self.on_about_dialog_response,
         'on_main_window_destroy' : self.on_main_window_destroy,

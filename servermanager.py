@@ -27,11 +27,11 @@ import twisted.internet.error
 
 import cPickle
 
-import rconserver
 import serverlogger
 import utils
 import recentcommands
 import pinggraph
+import addserverdialog
 
 import SourceLib
 
@@ -66,13 +66,11 @@ class ServerManager(object):
     self.text_tags = gui.text_tags
 
     for s in self.servers.values():
-      self.textlogs[s] = ServerTextLog(gui.text_tags)
-      d = self.query_server(s)
+      d = self.init_server(s)
       d.addCallback(self.on_init_post_query_server, s)
 
 
     d = { 'on_rcon_password_icon_press' : self.on_rcon_password_icon_press,
-          'on_confirm_add_server_clicked' : self.on_confirm_add_server_clicked,
           'on_act_remove_server_activate' : self.on_act_remove_server_activate,
           'on_rcon_input_activate' : self.on_rcon_input_activate,
           'on_rcon_input_icon_press' : self.on_rcon_input_icon_press,
@@ -85,9 +83,24 @@ class ServerManager(object):
           'on_act_toggle_logging_toggled' : self.on_act_toggle_logging_toggled,
         }
 
+    self.addserverdialog = addserverdialog.AddServerDialog(self, builder, dic)
+
     dic.update(d)
 
     self.pinggraph = pinggraph.PingGraph(dic, self.bd.get_object("ping_graph"))
+
+  def add_server(self, server):
+    '''Returns a Defer if the server has been added, False otherwise'''
+    sid = self.get_server_sid(server)
+    if sid in self.servers:
+      return False
+    
+    self.servers[sid] = server
+    return self.init_server(server)
+
+  def init_server(self, server):
+    self.textlogs[server] = ServerTextLog(self.text_tags)
+    return self.query_server(server)
 
   def on_expand_player_list_clicked(self, widget):
     pl = self.bd.get_object("players_window")
@@ -164,58 +177,7 @@ class ServerManager(object):
       return self.log_rcon(server, "version")
     return False
 
-  def on_confirm_add_server_clicked(self, widget):
-    ip = self.bd.get_object("ip_entry").get_text()
-    if not ip:
-      return
 
-    try:
-      port = int(self.bd.get_object("port_entry").get_text())
-    except:
-      #TODO: error checking
-      print("Invalid port")
-      return
-    self.add_server(ip, port)
-
-  def add_server(self, ip, port):
-    gs = rconserver.Gameserver(ip, port)
-    sid = self.get_server_sid(gs)
-    if not sid in self.servers:
-      d = self.query_server(gs)
-      d.addCallback(self.on_add_server_post_query, sid, gs)
-   
-      self.servers[sid] = gs
-      self.textlogs[gs] = ServerTextLog(self.text_tags)
-
-      self.bd.get_object("query_label").set_text("Querying server...")
-      self.bd.get_object("query_spinner").set_visible(True)
-      self.bd.get_object("confirm_add_server").set_sensitive(False)
-      self.bd.get_object("query_infobox").set_message_type(Gtk.MessageType.INFO)
-    else:
-      self.bd.get_object("query_infobox").set_message_type(Gtk.MessageType.WARNING)
-      self.bd.get_object("query_label").set_text("Server is already in the list.")
-      self.bd.get_object("query_spinner").set_visible(False)
-
-    self.bd.get_object("query_infobox").set_visible(True)
-
-
-  def on_add_server_post_query(self, ret_tuple, sid, server):
-    success, errval = ret_tuple
-    if not success:
-      self.bd.get_object("query_label").set_text(str(errval))
-      self.bd.get_object("query_infobox").set_message_type(Gtk.MessageType.ERROR)
-      self.bd.get_object("query_spinner").set_visible(False)
-      self.bd.get_object("confirm_add_server").set_sensitive(True)
-
-      self.delete_server(server)
-
-      return
-
-    self.add_server_item(server)
-
-    self.close_server_dialog(self.bd.get_object("add_server_dialog"))
-
-    GObject.timeout_add(1000, self.on_query_timer, server)
 
   def on_query_timer(self, server):
     if server not in self.servers.values():
@@ -463,9 +425,5 @@ class ServerManager(object):
     store = self.bd.get_object("servers_liststore")
     iter = store.append([self.get_server_sid(server), server.info['hostname'],str(server.info['numplayers']) + "/" + str(server.info['maxplayers']), server.info['ping'], server.info['map'], Gtk.STOCK_CONNECT if connected else Gtk.STOCK_DISCONNECT])
     self.bd.get_object("server_list").set_cursor(store.get_path(iter))
-
-  def close_server_dialog(self, widget):
-    self.bd.get_object("main_window").set_sensitive(True)
-    widget.hide()
 
 
