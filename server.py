@@ -44,6 +44,8 @@ class Gameserver(object):
     self.info['ip'] = ip
     self.info['port'] = port
 
+    self.player = []
+
 
   def __reduce__(self):
     '''Magical pickle packer, creates a new "gameserver" instance with the following args'''
@@ -81,11 +83,14 @@ class Gameserver(object):
     try:
       q = SourceLib.SourceQuery.SourceQuery(self.ip, self.port)
       info = q.info()
-      #print(q.player())
       if info:
         self.info.update(info)
       else:
         return False, "Failed to connect to the server"
+
+      player = q.player()
+      if len(player):
+        self.player = player
 
       if 'ping' in self.info:
         self.info['ping'] = int(self.info['ping'] * 1000)

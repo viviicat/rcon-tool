@@ -25,6 +25,7 @@ from twisted.internet import threads
 from twisted.internet import reactor
 import twisted.internet.error
 
+import time # If only we had more time
 import cPickle
 
 import serverlogger
@@ -202,7 +203,6 @@ class ServerManager(object):
 
   def on_query_timer(self, server):
     if server not in self.servers.values():
-      print("nope!")
       return False
 
     self.query_server(server)
@@ -320,7 +320,7 @@ class ServerManager(object):
       if not ip:
         return
 
-      for port in range(27020,27100):
+      for port in xrange(27020,27100):
         try:
           self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
           for line in response.split('\n'):
@@ -359,7 +359,7 @@ class ServerManager(object):
         break
 
     if success and self.cur_server and server is self.cur_server:
-      self.populate_query_data(server.info)
+      self.populate_query_data(server.info, server.player)
 
     return ret_tuple
 
@@ -406,13 +406,33 @@ class ServerManager(object):
   def format_numplayers(self, info):
     return str(info['numplayers']) + "/" + str(info['maxplayers'])
 
-  def populate_query_data(self, info=[]):
+  def populate_query_data(self, info=[], players=[]):
+    def get_play_time_string(seconds):
+      return time.strftime('%H:%M:%S', time.gmtime(seconds))
+
     labels = ['hostname', 'ip', 'port', 'map', 'gamedesc', 'ping']
     for l in labels:
       self.bd.get_object(l+"_label").set_text(str(info[l]) if l in info else "")
 
     self.bd.get_object("players_label").set_text(self.format_numplayers(info) if info else "")
-
+      
+    store = self.bd.get_object("players_liststore")
+    # handle the case where we have players already in the list
+    # by setting instead of deleting and adding, we should avoid deselection or messiness
+    for row in store:
+      p_index = store.get_value(row.iter, 0)
+      if p_index < len(players):
+        plr = players[p_index]
+        # time is in seconds, convert to h:m:s (this mods by one day, oh noes)
+        store.set(row.iter, 1, plr['name'], 2, plr['kills'], 3, get_play_time_string(plr['time']))
+      else:
+        # handle the case where a player on the list has left
+        store.remove(row.iter)
+    # handle the case where a player has joined
+    if len(players) > len(store):
+      for i in xrange(len(store), len(players)):
+        player = players[i]
+        store.append([i, player['name'], player['kills'], get_play_time_string(player['time'])])
 
   def on_show_rcon_toggle_toggled(self, show_rcon_toggle):
     self.set_show_rcon(show_rcon_toggle.get_active())

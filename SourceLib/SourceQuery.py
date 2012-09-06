@@ -277,7 +277,14 @@ class SourceQuery(object):
             try:
                 for x in xrange(numplayers):
                     player = {}
-                    player['index'] = packet.getByte()
+
+                    # Currently index seems to return zero. No worries,
+                    # they're returned in order so for python it's unimportant,
+                    # just use the actual index of this list
+                    # this would be player['index'] but it doesn't work, so
+                    # we're just clearing this useless byte out
+                    packet.getByte()
+
                     player['name'] = packet.getString()
                     player['kills'] = packet.getLong()
                     player['time'] = packet.getFloat()
