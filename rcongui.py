@@ -59,6 +59,7 @@ class RconGui:
 
     self.win.show()
 
+
   def setup_toolbar(self):
     '''Manually create a toolbar since Glade doesn't properly support 
     PRIMARY_TOOLBAR style'''
@@ -89,6 +90,7 @@ class RconGui:
     slot.set_property("expand", False)
     slot.pack_start(toolbar, False, True, 0)
 
+
   def on_server_list_button_press_event(self, treeview, event):
     # If the user right clicks, show them a menu
     if event.button == 3:
@@ -111,16 +113,20 @@ class RconGui:
     # get_window doesn't work here--next time it tries to show it fails. not sure why...
     self.servermanager.close_server_dialog(cancel_add_server.get_toplevel())
 
+
   def on_add_server_dialog_delete_event(self, add_server_dialog, event):
     self.servermanager.close_server_dialog(add_server_dialog)
     return True
+
 
   def on_about_dialog_delete_event(self, about_dialog, event):
     about_dialog.hide()
     return True
 
+
   def on_about_menuitem_activate(self, about_menuitem):
     self.bd.get_object("about_dialog").show()
+
 
   def on_about_dialog_response(self, about_dialog, response_id):
     about_dialog.hide()
@@ -129,8 +135,10 @@ class RconGui:
   def on_main_window_destroy(self, main_window):
     self.quit()
 
+
   def on_act_quit_activate(self, act_quit):
     self.quit()
+
 
   def quit(self):
     self.servermanager.quit()

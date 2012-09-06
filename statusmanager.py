@@ -36,6 +36,7 @@ class StatusManager(object):
     self.msgs = 0
     pass
 
+
   def time_to_pop(self):
     self.statusbar.pop(0)
     self.msgs -= 1
@@ -55,6 +56,7 @@ def push_status(message):
 
   self.statusbar.push(0, message)
   self.msgs += 1
+
 
 def set_statusbar(statusbar):
   self.statusbar = statusbar

@@ -32,9 +32,11 @@ class PingGraph(object):
 
     self.data = None
 
+
   def set_data(self, data):
     '''Set or switch the source of the data (owned by each Gameserver)'''
     self.data = data
+
 
   def queue_draw(self):
     '''Called when the graph should be redrawn--sets it visible and tells Gtk
@@ -42,6 +44,7 @@ class PingGraph(object):
     rect = self.darea.get_allocation()
     self.darea.queue_draw_area(0, 0, rect.width, rect.height)
     self.darea.set_visible(True)
+
 
   def on_ping_graph_draw(self, ping_graph, cx):
     '''Actually draw the graph with Cairo'''
@@ -60,7 +63,6 @@ class PingGraph(object):
     g.add_color_stop_rgb(0.6, 1.0, 1.0, 0.2)
     g.add_color_stop_rgb(1.0, 0.2, 1.0, 0.2)
     cx.set_source(g)
-
 
     x = 0
     for i in range(len(self.data)):

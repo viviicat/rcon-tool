@@ -40,8 +40,10 @@ class RecentCommandManager(object):
     except:
       pass
 
+
   def add_to_store(self, cmd):
     self.store.append([cmd])
+
 
   def addcmd(self, command):
     command = command.strip()
@@ -51,6 +53,7 @@ class RecentCommandManager(object):
       self.add_to_store(command)
     else:
       self.commands[command] += 1
+
 
   def quit(self):
     fcmds = open("recentcommands.pkl", "w")

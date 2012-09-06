@@ -98,6 +98,7 @@ class ServerManager(object):
 
     self.pinggraph = pinggraph.PingGraph(dic, self.bd.get_object("ping_graph"))
 
+
   def add_server(self, server):
     '''Returns a Defer if the server has been added, False otherwise'''
     sid = self.get_server_sid(server)
@@ -107,9 +108,11 @@ class ServerManager(object):
     self.servers[sid] = server
     return self.init_server(server)
 
+
   def init_server(self, server):
     self.textlogs[server] = ServerTextLog(self.text_tags)
     return self.query_server(server)
+
 
   def on_expand_player_list_clicked(self, expand_player_list):
     pl = self.bd.get_object("players_window")
@@ -118,38 +121,42 @@ class ServerManager(object):
 
     pl.set_visible(not pl.get_visible())
 
+
   def log_rcon(self, server, command, threaded=True):
+    def cb(ret_tuple):
+      success, response = ret_tuple
+      response = str(response)
+
+      if self.bd.get_object("show_rcons").get_active():
+        self.append_to_log(server, command, 'local')
+        self.append_to_log(server, response, 'remote')
+
+      rcon_password = self.bd.get_object("rcon_password")
+
+      if success:
+        rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_OK)
+      else:
+        rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_ERROR)
+
+      if not "Unknown command" in response:
+        self.recentcmdmgr.addcmd(command)
+
+      return ret_tuple
+    
+    #--------------------------------------------------
+
     if not self.cur_server.rcon_connected():
       self.cur_server.set_rcon(self.bd.get_object("rcon_password").get_text())
 
     if threaded:
       d = threads.deferToThread(self.cur_server.rcon_cmd, command)
-      d.addCallback(self.on_log_rcon_finished, command, server)
+      d.addCallback(cb)
 
       return d
     else:
-      return self.on_log_rcon_finished(self.cur_server.rcon_cmd(command), command, server)
+      return cb(self.cur_server.rcon_cmd(command))
 
-  def on_log_rcon_finished(self, ret_tuple, command, server):
-    success, response = ret_tuple
-    response = str(response)
 
-    if self.bd.get_object("show_rcons").get_active():
-      self.append_to_log(server, command, 'local')
-      self.append_to_log(server, response, 'remote')
-
-    rcon_password = self.bd.get_object("rcon_password")
-
-    if success:
-      rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_OK)
-    else:
-      rcon_password.set_property("secondary-icon-stock", Gtk.STOCK_DIALOG_ERROR)
-
-    if not "Unknown command" in response:
-      self.recentcmdmgr.addcmd(command)
-
-    return ret_tuple
-  
   def append_to_log(self, server, text, tag):
     if not text:
       return
@@ -160,12 +167,14 @@ class ServerManager(object):
     if server is self.cur_server:
       self.stick_check()
 
+
   def quit(self):
     prefs = open("servers.pkl", "w")
     cPickle.dump(self.servers, prefs, 2)
     prefs.close()
 
     self.recentcmdmgr.quit()
+
 
   def on_rcon_password_changed(self, rcon_password):
     enabled = rcon_password.get_text() != ""
@@ -181,22 +190,26 @@ class ServerManager(object):
   def on_rcon_password_icon_press(self, rcon_password, pos, event):
     self.test_rcon(self.cur_server)
 
+
   def test_rcon(self, server):
+    def cb(ret_tuple):
+      success, response = ret_tuple
+      if success:
+        statusmanager.push_status("RCON Password test succeeded.")
+      else:
+        statusmanager.push_status("RCON Password test failed.")
+
+      return ret_tuple
+
+    #--------------------------------------------------
+
     if server:
       server.set_rcon(self.bd.get_object("rcon_password").get_text())
       d = self.log_rcon(server, "version")
-      d.addCallback(self.test_rcon_cb)
+      d.addCallback(cb)
       return d
     return False
 
-  def test_rcon_cb(self, ret_tuple):
-    success, response = ret_tuple
-    if success:
-      statusmanager.push_status("RCON Password test succeeded.")
-    else:
-      statusmanager.push_status("RCON Password test failed.")
-
-    return ret_tuple
 
   def on_rcon_password_activate(self, rcon_password):
     self.test_rcon(self.cur_server)
@@ -260,9 +273,33 @@ class ServerManager(object):
 
 
   def query_server(self, server):
+    def cb(ret_tuple):
+      '''Called when the query thread gets info about a server'''
+      success, errmsg = ret_tuple
+
+      # update ping graph whether or not this query worked
+      server.add_ping_history()
+      self.pinggraph.queue_draw()
+
+      store = self.bd.get_object("servers_liststore")
+
+
+      for row in store:
+        if store.get_value(row.iter, 0) == self.get_server_sid(server):
+          store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'], 5, Gtk.STOCK_CONNECT if success else Gtk.STOCK_DISCONNECT)
+          break
+
+      if success and self.cur_server and server is self.cur_server:
+        self.populate_query_data(server.info, server.player)
+
+      return ret_tuple
+
+    #--------------------------------------------------
+
     d = threads.deferToThread(server.query)
-    d.addCallback(self.on_query_result, server)
+    d.addCallback(cb)
     return d
+
 
   def on_rcon_input_activate(self, rcon_input):
     text = rcon_input.get_text()
@@ -272,12 +309,15 @@ class ServerManager(object):
     self.log_rcon(self.cur_server, text)
     rcon_input.set_text("")
 
+
   def on_rcon_input_changed(self, rcon_input):
     rcon_input.set_icon_sensitive(1, rcon_input.get_text())
+
 
   def on_rcon_input_icon_press(self, rcon_input, pos, event):
     if rcon_input.get_text():
       self.log_rcon(self.cur_server, 'find ' + rcon_input.get_text())
+
 
   def on_act_toggle_logging_toggled(self, act_toggle_logging):
     if not self.cur_server:
@@ -290,7 +330,46 @@ class ServerManager(object):
     if act_toggle_logging.get_active():
       self.bd.get_object("rcon_notebook").set_current_page(1)
 
+
   def set_logging(self, server, enabled):
+    def cb(ret_tuple):
+      # FIXME: This is not run in a thread, so it hangs the system if connecting takes a while.
+      success, response = ret_tuple
+      if not success:
+        self.bd.get_object("act_toggle_logging").set_active(False)
+        return
+
+      s, r = self.log_rcon(server, 'log', False)
+      if 'not currently logging' in r:
+        self.log_rcon(server, 'log on', False)
+
+      def after_fetch_ip(ip):
+        if not ip:
+          return
+
+        for port in xrange(27020,27100):
+          try:
+            self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
+            for line in response.split('\n'):
+              if ip in line and str(port) not in line:
+                self.log_rcon(server, 'logaddress_del ' + line, False)
+
+            self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
+            statusmanager.push_status("Enabled logging from "+self.get_server_sid(server)+".")
+            break
+
+          except twisted.internet.error.CannotListenError:
+            print("Could not bind to port "+ str(port) + ", trying "+str(port+1))
+
+
+      ret, thread = utils.whatismyip()
+      if thread:
+        ret.addCallback(after_fetch_ip)
+      else:
+        after_fetch_ip(ret)
+
+    #-------------------------------------------------- 
+
     if enabled == server.logging:
       return
 
@@ -298,7 +377,7 @@ class ServerManager(object):
 
     if enabled:
       d = self.log_rcon(server, "logaddress_list")
-      d.addCallback(self.set_logging_post_list, server)
+      d.addCallback(cb)
 
     elif server in self.loggers:
       self.loggers[server].stopListening()
@@ -306,82 +385,28 @@ class ServerManager(object):
       statusmanager.push_status("Disabled logging from "+self.get_server_sid(server)+".")
 
 
-  def set_logging_post_list(self, ret_tuple, server):
-    # FIXME: This is not run in a thread, so it hangs the system if connecting takes a while.
-    success, response = ret_tuple
-    if not success:
-      self.bd.get_object("act_toggle_logging").set_active(False)
-      return
-
-    s, r = self.log_rcon(server, 'log', False)
-    if 'not currently logging' in r:
-      self.log_rcon(server, 'log on', False)
-
-    def after_fetch_ip(ip):
-      if not ip:
-        return
-
-      for port in xrange(27020,27100):
-        try:
-          self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
-          for line in response.split('\n'):
-            if ip in line and str(port) not in line:
-              self.log_rcon(server, 'logaddress_del ' + line, False)
-
-          self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
-          statusmanager.push_status("Enabled logging from "+self.get_server_sid(server)+".")
-          break
-
-        except twisted.internet.error.CannotListenError:
-          print("Could not bind to port "+ str(port) + ", trying "+str(port+1))
-
-
-    ret, thread = utils.whatismyip()
-    if thread:
-      ret.addCallback(after_fetch_ip)
-    else:
-      after_fetch_ip(ret)
-
-
-  def on_query_result(self, ret_tuple, server):
-    '''Called when the query thread gets info about a server'''
-    success, errmsg = ret_tuple
-
-    # update ping graph whether or not this query worked
-    server.add_ping_history()
-    self.pinggraph.queue_draw()
-
-    store = self.bd.get_object("servers_liststore")
-
-
-    for row in store:
-      if store.get_value(row.iter, 0) == self.get_server_sid(server):
-        store.set(row.iter, 1, server.info['hostname'], 2, self.format_numplayers(server.info), 3, server.info['ping'], 4, server.info['map'], 5, Gtk.STOCK_CONNECT if success else Gtk.STOCK_DISCONNECT)
-        break
-
-    if success and self.cur_server and server is self.cur_server:
-      self.populate_query_data(server.info, server.player)
-
-    return ret_tuple
-
   def stick_check(self):
     '''If we try to stick now, we'll scroll to the pre-calculated 'bottom' of the buffer, which is the
     end of the previous line. So we just defer the stick until the next loop so it'll get taken care of properly.
     Also, we're not using the 'insert mark' that many online have suggested, because if the text is selected it
     sticks to that part of the buffer instead of the bottom. I have yet to find a nice elegant way to do this.
     This way makes for a slight flicker, but it's way better than anything else I've tried'''
-    GObject.idle_add(self._stick_check)
+    def cb():
+      log_tv = self.bd.get_object("server_log_textview")
 
-  def _stick_check(self):
-    log_tv = self.bd.get_object("server_log_textview")
+      if self.bd.get_object("stick_to_bottom").get_active():
+        adj = log_tv.get_vadjustment()
+        adj.set_value(adj.get_upper())
 
-    if self.bd.get_object("stick_to_bottom").get_active():
-      adj = log_tv.get_vadjustment()
-      adj.set_value(adj.get_upper())
+    #--------------------------------------------------
+
+    GObject.idle_add(cb)
+
 
   def on_stick_to_bottom_toggled(self, stick_to_bottom):
     if self.cur_server and stick_to_bottom.get_active():
       self.stick_check()
+
 
   def populate_selected(self):
     '''update the gui for the selected server'''
@@ -406,8 +431,10 @@ class ServerManager(object):
 
     self.bd.get_object("act_toggle_logging").set_active(self.cur_server.logging)
 
+
   def format_numplayers(self, info):
     return str(info['numplayers']) + "/" + str(info['maxplayers'])
+
 
   def populate_query_data(self, info=[], players=[]):
     def get_play_time_string(seconds):
@@ -437,6 +464,7 @@ class ServerManager(object):
         player = players[i]
         store.append([i+1, player['name'] if player['name'] else '< Connecting... >', player['kills'], get_play_time_string(player['time'])])
 
+
   def on_show_rcon_toggle_toggled(self, show_rcon_toggle):
     self.set_show_rcon(show_rcon_toggle.get_active())
 
@@ -446,6 +474,7 @@ class ServerManager(object):
     self.bd.get_object("show_rcon_toggle").set_active(enabled)
     if self.cur_server:
       self.cur_server.set_rcon_visibility(enabled)
+
 
   def on_save_rcon_toggle_toggled(self, save_rcon_toggle):
     if self.cur_server:
@@ -473,6 +502,7 @@ class ServerManager(object):
 
     self.clear_server_display()
 
+
   def clear_server_display(self):
     self.bd.get_object("rcon_notebook").set_sensitive(False)
     self.populate_query_data()
@@ -481,10 +511,10 @@ class ServerManager(object):
     self.bd.get_object("act_remove_server").set_sensitive(False)
     self.bd.get_object("save_rcon_toggle").set_active(True)
 
+
   def add_server_item(self, server, connected=True):
     store = self.bd.get_object("servers_liststore")
     iter = store.append([self.get_server_sid(server), server.info['hostname'],str(server.info['numplayers']) + "/" + str(server.info['maxplayers']), server.info['ping'], server.info['map'], Gtk.STOCK_CONNECT if connected else Gtk.STOCK_DISCONNECT])
     self.bd.get_object("server_list").set_cursor(store.get_path(iter))
-
 
 
