@@ -213,16 +213,11 @@ class SourceLogListener(asyncore.dispatcher):
         self.parser = parser
         self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bind(("", port))
-        self.host = host
         self.connect(host)
 
     def handle_connect(self):
-        # Fetch ip so we can compare with recvfrom to make sure this server is sending the data
-        ip, port = self.host
-        self.host = socket.gethostbyname(ip), port
-
         # The secret Demopan code to enable logging
-        self.sendto("Stout Shako for two Refined", self.host)
+        self.send("Stout Shako for two Refined")
 
     def handle_close(self):
         self.close()
