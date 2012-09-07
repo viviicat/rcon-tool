@@ -7,5 +7,5 @@ GenericName=RCON Tool Server Administration
 Terminal=false
 Icon=/home/gavin/rcontool/rcontool.png
 Type=Application
-Exec=python /home/gavin/rcontool/main.py
+Exec=python3 /home/gavin/rcontool/main.py
 Categories=Accessories;

@@ -22,8 +22,6 @@
 
 from gi.repository import Gtk
 
-from twisted.internet import reactor
-
 import servermanager
 import statusmanager
 
@@ -142,5 +140,4 @@ class RconGui:
 
   def quit(self):
     self.servermanager.quit()
-    print("stopping reactor")
-    reactor.stop()
+    Gtk.main_quit()

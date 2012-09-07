@@ -21,18 +21,17 @@
 
 from gi.repository import Gtk, GObject
 
-from twisted.internet import threads
-from twisted.internet import reactor
-import twisted.internet.error
-
 import time # If only we had more time
-import cPickle
+import pickle
 
 import serverlogger
 import utils
 import recentcommands
 import pinggraph
 import addserverdialog
+
+import cbthread
+import socket
 
 import statusmanager
 
@@ -63,9 +62,9 @@ class ServerManager(object):
 
     self.bd = builder
     try:
-      prefs = open("servers.pkl", "r")
-      self.servers = cPickle.load(prefs)
-      prefs.close()
+      s_file = open("servers.pkl", "rb")
+      self.servers = pickle.load(s_file)
+      s_file.close()
 
     except:
       self.servers = {}
@@ -81,8 +80,8 @@ class ServerManager(object):
     self.text_tags = gui.text_tags
 
     for s in self.servers.values():
-      d = self.init_server(s)
-      d.addCallback(cb, s)
+      t = self.init_server(s)
+      t.addCallback(cb, s)
 
 
     d = { 'on_rcon_password_icon_press' : self.on_rcon_password_icon_press,
@@ -157,10 +156,10 @@ class ServerManager(object):
       self.cur_server.set_rcon(self.bd.get_object("rcon_password").get_text())
 
     if threaded:
-      d = threads.deferToThread(self.cur_server.rcon_cmd, command)
-      d.addCallback(cb)
+      t = cbthread.Thread(self.cur_server.rcon_cmd, cb, command)
+      t.start()
 
-      return d
+      return t
     else:
       return cb(self.cur_server.rcon_cmd(command))
 
@@ -177,9 +176,9 @@ class ServerManager(object):
 
 
   def quit(self):
-    prefs = open("servers.pkl", "w")
-    cPickle.dump(self.servers, prefs, 2)
-    prefs.close()
+    s_file = open("servers.pkl", 'wb')
+    pickle.dump(self.servers, s_file)
+    s_file.close()
 
     self.recentcmdmgr.quit()
 
@@ -305,9 +304,9 @@ class ServerManager(object):
 
     #--------------------------------------------------
 
-    d = threads.deferToThread(server.query)
-    d.addCallback(cb)
-    return d
+    t = cbthread.Thread(server.query, cb)
+    t.start()
+    return t
 
 
   def on_rcon_input_activate(self, rcon_input):
@@ -356,9 +355,9 @@ class ServerManager(object):
         if not ip:
           return
 
-        for port in xrange(27020,27100):
+        for port in range(27020,27100):
           try:
-            self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
+            self.loggers[server] = SourceLib.SourceLog.SourceLogListener((server.ip, server.port), port, serverlogger.GameserverLogger(self, server))
             for line in response.split('\n'):
               if ip in line and str(port) not in line:
                 self.log_rcon(server, 'logaddress_del ' + line, False)
@@ -366,9 +365,8 @@ class ServerManager(object):
             self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
             statusmanager.push_status("Enabled logging from "+self.get_server_sid(server)+".")
             break
-
-          except twisted.internet.error.CannotListenError:
-            print("Could not bind to port "+ str(port) + ", trying "+str(port+1))
+          except socket.error:
+            pass
 
 
       ret, thread = utils.whatismyip()
@@ -389,7 +387,7 @@ class ServerManager(object):
       d.addCallback(cb)
 
     elif server in self.loggers:
-      self.loggers[server].stopListening()
+      self.loggers[server].close()
       del self.loggers[server]
       statusmanager.push_status("Disabled logging from "+self.get_server_sid(server)+".")
 
@@ -469,7 +467,7 @@ class ServerManager(object):
         store.remove(row.iter)
     # handle the case where a player has joined
     if len(players) > len(store):
-      for i in xrange(len(store), len(players)):
+      for i in range(len(store), len(players)):
         player = players[i]
         store.append([i+1, player['name'] if player['name'] else '< Connecting... >', player['kills'], get_play_time_string(player['time'])])
 

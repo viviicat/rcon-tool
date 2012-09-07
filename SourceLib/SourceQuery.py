@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
@@ -31,8 +31,8 @@
 # TODO:  according to spec, packets may be bzip2 compressed.
 # TODO:: not implemented yet because I couldn't find a server that does this.
 
-import socket, struct, sys, time
-import StringIO
+import socket, struct, time
+from io import BytesIO
 
 PACKETSIZE=1400
 
@@ -63,7 +63,7 @@ A2S_RULES_REPLY = ord('E')
 CHALLENGE = -1
 S2C_CHALLENGE = ord('A')
 
-class SourceQueryPacket(StringIO.StringIO):
+class SourceQueryPacket(BytesIO):
     # putting and getting values
     def putByte(self, val):
         self.write(struct.pack('<B', val))
@@ -93,15 +93,15 @@ class SourceQueryPacket(StringIO.StringIO):
         return struct.unpack('<f', self.read(4))[0]
 
     def putString(self, val):
-        self.write(val + '\x00')
+        self.write(bytes(val + '\x00', 'UTF-8'))
 
     def getString(self):
         val = self.getvalue()
         start = self.tell()
-        end = val.index('\0', start)
+        end = val.index(b'\0', start)
         val = val[start:end]
         self.seek(end+1)
-        return val
+        return val.decode('UTF-8')
 
 class SourceQueryError(Exception):
     pass
@@ -150,7 +150,7 @@ class SourceQuery(object):
             total = packet.getByte()
             num = packet.getByte()
             splitsize = packet.getShort()
-            result = [0 for x in xrange(total)]
+            result = [0 for x in range(total)]
 
             result[num] = packet.read()
 
@@ -275,7 +275,7 @@ class SourceQuery(object):
 
             # TF2 32player servers may send an incomplete reply
             try:
-                for x in xrange(numplayers):
+                for x in range(numplayers):
                     player = {}
 
                     # Currently index seems to return zero. No worries,

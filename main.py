@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
@@ -21,21 +21,22 @@
 #------------------------------------------------------------------------------
 
 from gi.repository import GObject
-
-
-from twisted.internet import gtk3reactor
-gtk3reactor.install()
-
-import rcongui
-from twisted.internet import reactor
+from gi.repository import Gtk
+from gi.repository import Gdk
 
 import os, sys
 os.chdir(sys.path[0])
 
+import rcongui
+
+import gtkasync
 
 
 if __name__ == '__main__':
   GObject.threads_init()
+  Gdk.threads_enter()
   rcon_gui = rcongui.RconGui()
-  reactor.run()
-  #Gtk.main()
+  gtkasync.install()
+  #reactor.run()
+  Gtk.main()
+  Gdk.threads_leave()

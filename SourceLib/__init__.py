@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
@@ -24,6 +24,6 @@
 # THE SOFTWARE.
 #------------------------------------------------------------------------------
 
-import SourceQuery
-import SourceRcon
-import SourceLog
+from . import SourceQuery
+from . import SourceRcon
+from . import SourceLog

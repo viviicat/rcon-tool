@@ -21,7 +21,7 @@
 
 
 
-import cPickle
+import pickle
 
 MAX_CMDS = 25
 
@@ -30,8 +30,8 @@ class RecentCommandManager(object):
     self.store = store
     self.commands = {}
     try:
-      fcmds = open("recentcommands.pkl", "r")
-      cmds = cPickle.load(fcmds)
+      fcmds = open("recentcommands.pkl", "rb")
+      cmds = pickle.load(fcmds)
       for cmd, val in cmds:
         self.commands[cmd] = val
         self.add_to_store(cmd)
@@ -56,9 +56,9 @@ class RecentCommandManager(object):
 
 
   def quit(self):
-    fcmds = open("recentcommands.pkl", "w")
+    fcmds = open("recentcommands.pkl", 'wb')
 
-    best_cmds = [tup for tup in sorted(self.commands.iteritems(), key=lambda(k, v) : (v, k))][:MAX_CMDS]
+    best_cmds = [tup for tup in sorted(self.commands.items(), key=lambda item: (item[1], item[0]),reverse=True)][:MAX_CMDS]
 
-    cPickle.dump(best_cmds, fcmds, 2)
+    pickle.dump(best_cmds, fcmds)
     fcmds.close()

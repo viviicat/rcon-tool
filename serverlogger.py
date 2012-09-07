@@ -96,7 +96,6 @@ class GameserverLogger(SourceLib.SourceLog.SourceLogParser):
 
   def parse(self, line):
     SourceLib.SourceLog.SourceLogParser.parse(self, line)
-    line = line.strip('\x00\xff\r\n\t')
     self.manager.append_to_log(self.server, line, 'remote')
 
 

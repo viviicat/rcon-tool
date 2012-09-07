@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 import re
 import socket
 
-import twisted.internet.protocol
+import asyncore
 
 PACKETSIZE=1400
 
@@ -125,7 +125,6 @@ class SourceLogParser(object):
         pass
 
     def parse(self, line):
-        line = line.strip('\x00\xff\r\n\t ')
 
         # parse header (type and date)
         match = REHEADER.match(line)
@@ -140,7 +139,7 @@ class SourceLogParser(object):
         if match.group('type') == 'RL':
             remote = True
 
-        timestamp = map(int, match.group('year', 'month', 'day', 'hour', 'minute', 'second'))
+        timestamp = list(map(int, match.group('year', 'month', 'day', 'hour', 'minute', 'second')))
 
         # parse properties (key "value"), optional
         properties = {}
@@ -207,26 +206,34 @@ class SourceLogParser(object):
 class SourceLogListenerError(Exception):
     pass
 
-class SourceLogListener(twisted.internet.protocol.DatagramProtocol):
-  def __init__(self, host, port, parser):
-    self.parser = parser
-    self.host = host
-    self.port = port
+class SourceLogListener(asyncore.dispatcher):
+    def __init__(self, host, port, parser):
+        asyncore.dispatcher.__init__(self)
+        self.parser = parser
+        self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.bind(("", port))
+        self.connect(host)
 
-  def startProtocol(self):
-    #FIXME: don't use gethostbyname, get ip ahead of time to save dns lag
-    self.transport.connect(socket.gethostbyname(self.host), self.port)
-    # Send something to the server so it has a reason to answer.
-    # I like the polite 'hello' but it can be anything
-    self.transport.write("hello")
+    def handle_connect(self):
+        # The secret Demopan code to enable logging
+        self.send(b"Stout Shako for two Refined")
 
-  def datagramReceived(self, data, (host, port)):
-    if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
-        self.parser.parse(data)
+    def handle_close(self):
+        self.close()
 
-    else:
-        raise SourceLogListenerError("Received invalid packet.")
+    def handle_read(self):
+        data = self.recv(PACKETSIZE)
 
-  def connectionRefused(self):
-    print("Connection was refused!")
+        if data.startswith(b'\xff\xff\xff\xff') and data.endswith(b'\n\x00'):
+            data = data.strip(b'\x00\xff\r\n\t ')
+            self.parser.parse(data.decode('UTF-8'))
+
+        else:
+            raise SourceLogListenerError("Received invalid packet.")
+
+    def writable(self):
+        return False
+
+    def handle_write(self):
+        pass
 

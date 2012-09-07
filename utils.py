@@ -19,9 +19,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #------------------------------------------------------------------------------
 
-from twisted.internet import threads
+import cbthread
 
-import re, urllib
+import re, urllib.request, urllib.parse, urllib.error
 
 MY_IP = None
 
@@ -33,7 +33,7 @@ def whatismyip(site='http://ipecho.net/plain'):
 
   def post_fetch(site):
     global MY_IP
-    ip = site.read()
+    ip = site.read().decode('UTF-8')
     print("Got " + ip)
     # FIXME: better regex is possible
     if is_valid_ip(ip):
@@ -47,8 +47,8 @@ def whatismyip(site='http://ipecho.net/plain'):
     return MY_IP, False
   else:
     print("Fetching new copy of public IP from " + site + "...")
-    d = threads.deferToThread(urllib.urlopen, site)
-    d.addCallback(post_fetch)
-    return d, True
+    t = cbthread.Thread(urllib.request.urlopen, post_fetch, site)
+    t.start()
+    return t, True
 
 
