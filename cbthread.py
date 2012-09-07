@@ -25,7 +25,6 @@
 # Note: Only works with target-type threads for now
 
 import threading
-from collections import Iterable
 
 from gi.repository import GObject
 
@@ -33,12 +32,12 @@ class Thread(threading.Thread):
   def __init__(self, target, callback, *args ):
     super(Thread, self).__init__(target=self._thread_wrapper, args=(callback, args))
 
-    self.callbacks = [callback]
+    self.callbacks = [ [callback,  None] ]
 
     self.usertarget = target
 
-  def addCallback(self, callback):
-    self.callbacks.append(callback)
+  def addCallback(self, callback, *args):
+    self.callbacks.append([callback, args])
 
   def _thread_wrapper(self, callback, args):
     '''This is where the thread starts. It calls the target and then sets up the gtk wrapper
@@ -50,7 +49,8 @@ class Thread(threading.Thread):
     '''This is called when the thread has finished and flow has returned to the main thread.
     It calls the user's callbacks in order'''
     for cb in self.callbacks:
-      if not isinstance(rets, Iterable):
-        rets = (rets,)
-
-      rets = cb(*rets)
+      if cb[1]:
+        rets = cb[0](rets, *cb[1])
+      else:
+        rets = cb[0](rets)
+        

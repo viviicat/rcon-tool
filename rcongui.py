@@ -140,3 +140,4 @@ class RconGui:
 
   def quit(self):
     self.servermanager.quit()
+    Gtk.main_quit()

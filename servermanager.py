@@ -79,8 +79,8 @@ class ServerManager(object):
     self.text_tags = gui.text_tags
 
     for s in self.servers.values():
-      d = self.init_server(s)
-      d.addCallback(cb, s)
+      t = self.init_server(s)
+      t.addCallback(cb, s)
 
 
     d = { 'on_rcon_password_icon_press' : self.on_rcon_password_icon_press,
