@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #------------------------------------------------------------------------------
-# utils - short utility functions for rcontool
+# gtk-async - Allows the use of asyncore with GTK's mainloop
 # Copyright (c) 2012 Gavin Langdon <puttabutta@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -19,36 +19,14 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #------------------------------------------------------------------------------
 
-import cbthread
 
-import re, urllib
+import asyncore
 
-MY_IP = None
+from gi.repository import GObject
 
-def is_valid_ip(input_str):
-  return re.match('^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', input_str) is not None
+def _loop():
+  asyncore.loop(0, False, None, 1)
+  return True
 
-def whatismyip(site='http://ipecho.net/plain'):
-  global MY_IP
-
-  def post_fetch(site):
-    global MY_IP
-    ip = site.read()
-    print("Got " + ip)
-    # FIXME: better regex is possible
-    if is_valid_ip(ip):
-      MY_IP = ip
-      return ip
-    else:
-      print("Error: failed to fetch a valid public-facing IP address")
-      return None
-
-  if MY_IP:
-    return MY_IP, False
-  else:
-    print("Fetching new copy of public IP from " + site + "...")
-    t = cbthread.Thread(urllib.urlopen, post_fetch, site)
-    t.start()
-    return t, True
-
-
+def install():
+  GObject.idle_add(_loop)

@@ -31,6 +31,7 @@ import pinggraph
 import addserverdialog
 
 import cbthread
+import socket
 
 import statusmanager
 
@@ -356,7 +357,7 @@ class ServerManager(object):
 
         for port in xrange(27020,27100):
           try:
-            self.loggers[server] = reactor.listenUDP(port, SourceLib.SourceLog.SourceLogListener(server.ip, server.port, serverlogger.GameserverLogger(self, server)))
+            self.loggers[server] = SourceLib.SourceLog.SourceLogListener((server.ip, server.port), port, serverlogger.GameserverLogger(self, server))
             for line in response.split('\n'):
               if ip in line and str(port) not in line:
                 self.log_rcon(server, 'logaddress_del ' + line, False)
@@ -364,9 +365,8 @@ class ServerManager(object):
             self.log_rcon(server, 'logaddress_add ' + self.get_sid(ip, port), False)
             statusmanager.push_status("Enabled logging from "+self.get_server_sid(server)+".")
             break
-
-          except twisted.internet.error.CannotListenError:
-            print("Could not bind to port "+ str(port) + ", trying "+str(port+1))
+          except socket.error:
+            pass
 
 
       ret, thread = utils.whatismyip()
@@ -387,7 +387,7 @@ class ServerManager(object):
       d.addCallback(cb)
 
     elif server in self.loggers:
-      self.loggers[server].stopListening()
+      self.loggers[server].close()
       del self.loggers[server]
       statusmanager.push_status("Disabled logging from "+self.get_server_sid(server)+".")
 

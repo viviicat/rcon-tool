@@ -53,4 +53,6 @@ class Thread(threading.Thread):
         rets = cb[0](rets, *cb[1])
       else:
         rets = cb[0](rets)
+
+    return False # ensure gobject doesn't call this in the next idle
         

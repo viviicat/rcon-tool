@@ -27,14 +27,16 @@ from gi.repository import Gdk
 import rcongui
 
 import os, sys
-os.chdir(sys.path[0])
 
+import gtkasync
 
 
 if __name__ == '__main__':
+  os.chdir(sys.path[0])
   GObject.threads_init()
   Gdk.threads_enter()
   rcon_gui = rcongui.RconGui()
+  gtkasync.install()
   #reactor.run()
   Gtk.main()
   Gdk.threads_leave()

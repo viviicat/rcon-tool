@@ -32,7 +32,7 @@
 import re
 import socket
 
-import twisted.internet.protocol
+import asyncore
 
 PACKETSIZE=1400
 
@@ -207,26 +207,61 @@ class SourceLogParser(object):
 class SourceLogListenerError(Exception):
     pass
 
-class SourceLogListener(twisted.internet.protocol.DatagramProtocol):
-  def __init__(self, host, port, parser):
-    self.parser = parser
-    self.host = host
-    self.port = port
+class SourceLogListener(asyncore.dispatcher):
+    def __init__(self, host, port, parser):
+        asyncore.dispatcher.__init__(self)
+        self.parser = parser
+        self.create_socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.bind(("", port))
+        self.host = host
+        self.connect(host)
 
-  def startProtocol(self):
-    #FIXME: don't use gethostbyname, get ip ahead of time to save dns lag
-    self.transport.connect(socket.gethostbyname(self.host), self.port)
-    # Send something to the server so it has a reason to answer.
-    # I like the polite 'hello' but it can be anything
-    self.transport.write("hello")
+    def handle_connect(self):
+        # Fetch ip so we can compare with recvfrom to make sure this server is sending the data
+        ip, port = self.host
+        self.host = socket.gethostbyname(ip), port
 
-  def datagramReceived(self, data, (host, port)):
-    if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
-        self.parser.parse(data)
+        # The secret Demopan code to enable logging
+        self.sendto("Stout Shako for two Refined", self.host)
 
-    else:
-        raise SourceLogListenerError("Received invalid packet.")
+    def handle_close(self):
+        self.close()
 
-  def connectionRefused(self):
-    print("Connection was refused!")
+    def handle_read(self):
+        data = self.recv(PACKETSIZE)
 
+        if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
+            self.parser.parse(data)
+
+        else:
+            raise SourceLogListenerError("Received invalid packet.")
+
+    def writable(self):
+        return False
+
+    def handle_write(self):
+        pass
+
+#class SourceLogListener(asyncore.dispatcher):
+#  def __init__(self, host, port, parser):
+#    self.parser = parser
+#    self.host = host
+#    self.port = port
+#
+#  def startProtocol(self):
+#    #FIXME: don't use gethostbyname, get ip ahead of time to save dns lag
+#    self.transport.connect(socket.gethostbyname(self.host), self.port)
+#    # Send something to the server so it has a reason to answer.
+#    # I like the polite 'hello' but it can be anything
+#    self.transport.write("hello")
+#
+#  def datagramReceived(self, data, (host, port)):
+#    if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
+#        self.parser.parse(data)
+#
+#    else:
+#        raise SourceLogListenerError("Received invalid packet.")
+#
+#  def connectionRefused(self):
+#    print("Connection was refused!")
+#
