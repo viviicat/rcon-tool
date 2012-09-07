@@ -58,7 +58,7 @@ class RecentCommandManager(object):
   def quit(self):
     fcmds = open("recentcommands.pkl", "w")
 
-    best_cmds = [tup for tup in sorted(self.commands.iteritems(), key=lambda(k, v) : (v, k))][:MAX_CMDS]
+    best_cmds = [tup for tup in sorted(self.commands.iteritems(), key=lambda(k, v) : (v, k), reverse=True)][:MAX_CMDS]
 
     cPickle.dump(best_cmds, fcmds, 2)
     fcmds.close()
