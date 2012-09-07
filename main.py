@@ -21,13 +21,10 @@
 #------------------------------------------------------------------------------
 
 from gi.repository import GObject
-
-
-from twisted.internet import gtk3reactor
-gtk3reactor.install()
+from gi.repository import Gtk
+from gi.repository import Gdk
 
 import rcongui
-from twisted.internet import reactor
 
 import os, sys
 os.chdir(sys.path[0])
@@ -36,6 +33,8 @@ os.chdir(sys.path[0])
 
 if __name__ == '__main__':
   GObject.threads_init()
+  Gdk.threads_enter()
   rcon_gui = rcongui.RconGui()
-  reactor.run()
-  #Gtk.main()
+  #reactor.run()
+  Gtk.main()
+  Gdk.threads_leave()

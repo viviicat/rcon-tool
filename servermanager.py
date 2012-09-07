@@ -21,10 +21,6 @@
 
 from gi.repository import Gtk, GObject
 
-from twisted.internet import threads
-from twisted.internet import reactor
-import twisted.internet.error
-
 import time # If only we had more time
 import cPickle
 
@@ -33,6 +29,8 @@ import utils
 import recentcommands
 import pinggraph
 import addserverdialog
+
+import cbthread
 
 import statusmanager
 
@@ -157,10 +155,10 @@ class ServerManager(object):
       self.cur_server.set_rcon(self.bd.get_object("rcon_password").get_text())
 
     if threaded:
-      d = threads.deferToThread(self.cur_server.rcon_cmd, command)
-      d.addCallback(cb)
+      t = cbthread.Thread(self.cur_server.rcon_cmd, cb, command)
+      t.start()
 
-      return d
+      return t
     else:
       return cb(self.cur_server.rcon_cmd(command))
 
@@ -305,9 +303,9 @@ class ServerManager(object):
 
     #--------------------------------------------------
 
-    d = threads.deferToThread(server.query)
-    d.addCallback(cb)
-    return d
+    t = cbthread.Thread(server.query, cb)
+    t.start()
+    return t
 
 
   def on_rcon_input_activate(self, rcon_input):
