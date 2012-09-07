@@ -242,26 +242,3 @@ class SourceLogListener(asyncore.dispatcher):
     def handle_write(self):
         pass
 
-#class SourceLogListener(asyncore.dispatcher):
-#  def __init__(self, host, port, parser):
-#    self.parser = parser
-#    self.host = host
-#    self.port = port
-#
-#  def startProtocol(self):
-#    #FIXME: don't use gethostbyname, get ip ahead of time to save dns lag
-#    self.transport.connect(socket.gethostbyname(self.host), self.port)
-#    # Send something to the server so it has a reason to answer.
-#    # I like the polite 'hello' but it can be anything
-#    self.transport.write("hello")
-#
-#  def datagramReceived(self, data, (host, port)):
-#    if data.startswith('\xff\xff\xff\xff') and data.endswith('\n\x00'):
-#        self.parser.parse(data)
-#
-#    else:
-#        raise SourceLogListenerError("Received invalid packet.")
-#
-#  def connectionRefused(self):
-#    print("Connection was refused!")
-#
