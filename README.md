@@ -1,7 +1,7 @@
 rcon-tool
 =========
 
-rcon-tool is an open-source tool written in Python and GTK+ for managing SRCDS servers on linux. Uses modified SourceLib library.
+rcon-tool is an open-source tool written in Python and GTK+ for managing SRCDS servers on linux. Uses modified [SourceLib](https://github.com/frostschutz/SourceLib) library.
 
 ![Screenshot of rcon-tool](https://raw.github.com/gavintlgold/rcon-tool/master/interface.png)
 
